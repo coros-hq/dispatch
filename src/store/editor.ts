@@ -15,6 +15,8 @@ type EditorStore = {
   template: Template
   selection: SelectionState
   mode: EditorMode
+  previewWidth: 'desktop' | 'mobile'
+  setPreviewWidth: (width: 'desktop' | 'mobile') => void
 
   // Mode
   previewTemplate: Template | null;
@@ -79,6 +81,8 @@ export const useEditorStore = create<EditorStore>()(
       selection: { type: 'none' },
       mode: 'edit',
       previewTemplate: null,
+      previewWidth: 'desktop',
+      setPreviewWidth: (width) => set({ previewWidth: width }),
 
       setMode: (mode) => set({ mode }),
       setPreviewTemplate: (template) => set({ previewTemplate: template }),

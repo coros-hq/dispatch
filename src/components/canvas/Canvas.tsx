@@ -6,7 +6,7 @@ import { useEditorStore } from '../../store/editor'
 import SectionRow from './SectionRow'
 
 export default function Canvas() {
-  const { template, select, addSection, mode, previewTemplate } = useEditorStore()
+  const { template, select, addSection, previewWidth, mode, previewTemplate } = useEditorStore()
 
 
   const activeTemplate = mode === 'preview' && previewTemplate
@@ -29,7 +29,7 @@ export default function Canvas() {
       <div
         className={`w-full shadow-2xl rounded-xl overflow-hidden ${isPreview ? 'pointer-events-none' : ''}`}
         style={{
-          maxWidth: activeTemplate.globalStyles.contentWidth,
+          maxWidth: previewWidth === 'mobile' ? 375 : activeTemplate.globalStyles.contentWidth,
           backgroundColor: activeTemplate.globalStyles.bgColor,
         }}
       >

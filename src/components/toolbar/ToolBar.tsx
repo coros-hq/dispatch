@@ -9,7 +9,7 @@ export default function Toolbar() {
   const template = useEditorStore((s) => s.template)
   const renameTemplate = useEditorStore((s) => s.renameTemplate)
   const [copied, setCopied] = useState<'html' | 'code' | null>(null)
-const { mode, setMode, setPreviewTemplate } = useEditorStore()
+const { mode, setMode, setPreviewTemplate, previewWidth, setPreviewWidth } = useEditorStore()
 
   const copy = (text: string, type: 'html' | 'code') => {
     navigator.clipboard.writeText(text)
@@ -43,6 +43,24 @@ const handleTemplates = () => {
           className="text-xs text-muted-foreground bg-transparent border-b border-transparent focus:border-border focus:text-foreground outline-none transition-colors w-32"
         />
       </div>
+      <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
+  <Button
+    variant={previewWidth === 'desktop' ? 'secondary' : 'ghost'}
+    size="sm"
+    className="h-7 px-2 text-xs"
+    onClick={() => setPreviewWidth('desktop')}
+  >
+    Desktop
+  </Button>
+  <Button
+    variant={previewWidth === 'mobile' ? 'secondary' : 'ghost'}
+    size="sm"
+    className="h-7 px-2 text-xs"
+    onClick={() => setPreviewWidth('mobile')}
+  >
+    Mobile
+  </Button>
+</div>
       <Button
         variant={mode === 'preview' ? 'default' : 'outline'}
         size="sm"
