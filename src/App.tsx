@@ -1,0 +1,47 @@
+import BlockPanel from './components/panel/BlockPanel'
+import PropsPanel from './components/panel/PropsPanel'
+import Canvas from './components/canvas/Canvas'
+import DndProvider from './components/DndProvider'
+import CodePane from './components/editor/CodePane'
+import LinterPanel from './components/panel/LinterPanel'
+import { Separator } from '@/components/ui/separator'
+import Toolbar from './components/toolbar/ToolBar'
+
+export default function App() {
+  return (
+    <DndProvider>
+      <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+        <Toolbar />
+        <Separator />
+        <div className="flex flex-1 overflow-hidden">
+
+          {/* Left — sections + block palette */}
+          <aside className="w-48 border-r border-border bg-card shrink-0 overflow-y-auto">
+            <BlockPanel />
+          </aside>
+
+          {/* Center — canvas */}
+          <main className="flex-1 overflow-y-auto bg-muted">
+            <Canvas />
+          </main>
+
+          {/* Right — props + code + linter */}
+          <aside className="w-[380px] border-l border-border bg-card shrink-0 overflow-hidden flex flex-col">
+            <div className="overflow-y-auto">
+              <PropsPanel />
+            </div>
+            <Separator />
+            <div className="h-[240px] shrink-0 overflow-hidden">
+              <CodePane />
+            </div>
+            <Separator />
+            <div className="h-[200px] shrink-0 overflow-hidden">
+              <LinterPanel />
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </DndProvider>
+  )
+}
