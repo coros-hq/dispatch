@@ -4,13 +4,15 @@ import Canvas from './components/canvas/Canvas'
 import DndProvider from './components/DndProvider'
 import CodePane from './components/editor/CodePane'
 import LinterPanel from './components/panel/LinterPanel'
+import TemplatePanel from './components/panel/TemplatePanel'
 import { Separator } from '@/components/ui/separator'
-import Toolbar from './components/toolbar/ToolBar'
 import { useEditorStore } from './store/editor'
+import Toolbar from './components/toolbar/ToolBar'
 
 export default function App() {
-  const { select } = useEditorStore()
-  
+  const mode = useEditorStore((s) => s.mode)
+
+
   return (
     <DndProvider>
       <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
@@ -24,24 +26,32 @@ export default function App() {
           </aside>
 
           {/* Center — canvas */}
-          <main className="flex-1 overflow-y-auto bg-muted"       onClick={() => select({ type: 'none' })}
->
+          <main
+            className="flex-1 overflow-y-auto bg-muted"
+            onClick={() => useEditorStore.getState().select({ type: 'none' })}
+          >
             <Canvas />
           </main>
 
-          {/* Right — props + code + linter */}
+          {/* Right — template gallery or editor panels */}
           <aside className="w-[380px] border-l border-border bg-card shrink-0 overflow-hidden flex flex-col">
-            <div className="overflow-y-auto">
-              <PropsPanel />
-            </div>
-            <Separator />
-            <div className="h-[240px] shrink-0 overflow-hidden">
-              <CodePane />
-            </div>
-            <Separator />
-            <div className="h-[200px] shrink-0 overflow-hidden">
-              <LinterPanel />
-            </div>
+            {mode === 'preview' ? (
+              <TemplatePanel />
+            ) : (
+              <>
+                <div className="overflow-y-auto">
+                  <PropsPanel />
+                </div>
+                <Separator />
+                <div className="h-[240px] shrink-0 overflow-hidden">
+                  <CodePane />
+                </div>
+                <Separator />
+                <div className="h-[200px] shrink-0 overflow-hidden">
+                  <LinterPanel />
+                </div>
+              </>
+            )}
           </aside>
 
         </div>

@@ -6,18 +6,31 @@ import { useEditorStore } from '../../store/editor'
 import SectionRow from './SectionRow'
 
 export default function Canvas() {
-  const { template, addSection } = useEditorStore()
-  const sections = template.sections
+  const { template, select, addSection, mode, previewTemplate } = useEditorStore()
+
+
+  const activeTemplate = mode === 'preview' && previewTemplate
+    ? previewTemplate
+    : template
+
+  const sections = activeTemplate.sections
+  const isPreview = (mode === 'preview')
 
   return (
     <div
       className="min-h-full flex flex-col items-center py-10 px-6"
+      onClick={() => !isPreview && select({ type: 'none' })}
     >
+      {isPreview && (
+        <div className="mb-4 text-xs text-muted-foreground bg-card border border-border px-3 py-1.5 rounded-full">
+          Preview — hover a template on the right to see it here
+        </div>
+      )}
       <div
-        className="w-full shadow-2xl rounded-xl overflow-hidden"
+        className={`w-full shadow-2xl rounded-xl overflow-hidden ${isPreview ? 'pointer-events-none' : ''}`}
         style={{
-          maxWidth: template.globalStyles.contentWidth,
-          backgroundColor: template.globalStyles.bgColor,
+          maxWidth: activeTemplate.globalStyles.contentWidth,
+          backgroundColor: activeTemplate.globalStyles.bgColor,
         }}
       >
         <SortableContext

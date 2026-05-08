@@ -9,12 +9,23 @@ export default function Toolbar() {
   const template = useEditorStore((s) => s.template)
   const renameTemplate = useEditorStore((s) => s.renameTemplate)
   const [copied, setCopied] = useState<'html' | 'code' | null>(null)
+const { mode, setMode, setPreviewTemplate } = useEditorStore()
 
   const copy = (text: string, type: 'html' | 'code') => {
     navigator.clipboard.writeText(text)
     setCopied(type)
     setTimeout(() => setCopied(null), 2000)
   }
+
+const handleTemplates = () => {
+  if (mode === 'edit') {
+    setMode('preview')
+    setPreviewTemplate(null)
+  } else {
+    setMode('edit')
+    setPreviewTemplate(null)
+  }
+}
 
   return (
     <header className="h-12 bg-card flex items-center justify-between px-4 shrink-0">
@@ -32,6 +43,13 @@ export default function Toolbar() {
           className="text-xs text-muted-foreground bg-transparent border-b border-transparent focus:border-border focus:text-foreground outline-none transition-colors w-32"
         />
       </div>
+      <Button
+        variant={mode === 'preview' ? 'default' : 'outline'}
+        size="sm"
+        onClick={handleTemplates}
+      >
+        Templates
+      </Button>
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
