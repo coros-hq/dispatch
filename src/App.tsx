@@ -6,8 +6,11 @@ import CodePane from './components/editor/CodePane'
 import LinterPanel from './components/panel/LinterPanel'
 import { Separator } from '@/components/ui/separator'
 import Toolbar from './components/toolbar/ToolBar'
+import { useEditorStore } from './store/editor'
 
 export default function App() {
+  const { select } = useEditorStore()
+  
   return (
     <DndProvider>
       <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
@@ -21,7 +24,8 @@ export default function App() {
           </aside>
 
           {/* Center — canvas */}
-          <main className="flex-1 overflow-y-auto bg-muted">
+          <main className="flex-1 overflow-y-auto bg-muted"       onClick={() => select({ type: 'none' })}
+>
             <Canvas />
           </main>
 

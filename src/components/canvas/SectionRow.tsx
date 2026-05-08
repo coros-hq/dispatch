@@ -39,6 +39,11 @@ export default function SectionRow({ section }: Props) {
       onClick={handleClick}
       className={`relative group ${isSelected ? 'ring-2 ring-ring ring-inset' : ''}`}
     >
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-full opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none pb-1">
+        <span className="text-[10px] bg-card border border-border text-muted-foreground px-2 py-0.5 rounded-md whitespace-nowrap">
+          Click to edit section
+        </span>
+      </div>
       {/* Drag handle */}
       <div
         {...attributes}

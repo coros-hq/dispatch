@@ -6,13 +6,12 @@ import { useEditorStore } from '../../store/editor'
 import SectionRow from './SectionRow'
 
 export default function Canvas() {
-  const { template, select, addSection } = useEditorStore()
+  const { template, addSection } = useEditorStore()
   const sections = template.sections
 
   return (
     <div
       className="min-h-full flex flex-col items-center py-10 px-6"
-      onClick={() => select({ type: 'none' })}
     >
       <div
         className="w-full shadow-2xl rounded-xl overflow-hidden"
