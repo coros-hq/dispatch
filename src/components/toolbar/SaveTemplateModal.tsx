@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useEditorStore } from "../../store/editor";
-import { saveTemplate } from "@/lib/template-service";
+import { saveTemplate, updateTemplate } from "@/lib/template-service";
 import { toast } from "sonner";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,17 +16,25 @@ import {
 } from "@/components/ui/dialog";
 
 export default function SaveTemplateModal() {
-  const template = useEditorStore((s) => s.template);
+  const { template, currentProjectId, setCurrentProjectId } = useEditorStore();
   const renameTemplate = useEditorStore((s) => s.renameTemplate);
   const [isPublic, setIsPublic] = useState(false);
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const isExisting = !!currentProjectId;
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveTemplate(template, isPublic);
-      toast.success("Template saved");
+      if (isExisting) {
+        await updateTemplate(currentProjectId, template, isPublic);
+        toast.success("Project updated");
+      } else {
+        const saved = await saveTemplate(template, isPublic);
+        setCurrentProjectId(saved.id);
+        toast.success("Project saved");
+      }
       setOpen(false);
     } catch (err: any) {
       toast.error(err.message);
@@ -39,14 +47,18 @@ export default function SaveTemplateModal() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          Save template
+          {isExisting ? "Save" : "Save template"}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Save template</DialogTitle>
+          <DialogTitle>
+            {isExisting ? "Save project" : "Save template"}
+          </DialogTitle>
           <DialogDescription>
-            Save your current design as a reusable template
+            {isExisting
+              ? "Update your existing project with the current changes"
+              : "Save your current design as a reusable template"}
           </DialogDescription>
         </DialogHeader>
 
@@ -77,7 +89,7 @@ export default function SaveTemplateModal() {
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={saving || !template.name}>
-            {saving ? "Saving..." : "Save"}
+            {saving ? "Saving..." : isExisting ? "Update" : "Save"}
           </Button>
         </div>
       </DialogContent>

@@ -1,87 +1,109 @@
-import { create } from 'zustand'
-import { v4 as uuid } from 'uuid'
-import type { Block, Column, GlobalStyles, Section, Template } from '../types'
-import { persist } from 'zustand/middleware'
+import { create } from "zustand";
+import { v4 as uuid } from "uuid";
+import type { Block, Column, GlobalStyles, Section, Template } from "../types";
+import { persist } from "zustand/middleware";
 
 type SelectionState =
-  | { type: 'none' }
-  | { type: 'section'; sectionId: string }
-  | { type: 'block'; sectionId: string; columnId: string; blockId: string }
+  | { type: "none" }
+  | { type: "section"; sectionId: string }
+  | { type: "block"; sectionId: string; columnId: string; blockId: string };
 
-type EditorMode = 'edit' | 'preview'
-
+type EditorMode = "edit" | "preview";
 
 type EditorStore = {
-  template: Template
-  selection: SelectionState
-  mode: EditorMode
-  previewWidth: 'desktop' | 'mobile'
-  setPreviewWidth: (width: 'desktop' | 'mobile') => void
+  template: Template;
+  selection: SelectionState;
+  mode: EditorMode;
+  previewWidth: "desktop" | "mobile";
+  setPreviewWidth: (width: "desktop" | "mobile") => void;
 
+  currentProjectId: string | null;
+  setCurrentProjectId: (id: string | null) => void;
   // Mode
   previewTemplate: Template | null;
   setMode: (mode: EditorMode) => void;
   setPreviewTemplate: (template: Template | null) => void;
 
   // Section actions
-  addSection: (columnCount: 1 | 2 | 3) => void
-  updateSection: (sectionId: string, changes: Partial<Omit<Section, 'id' | 'columns'>>) => void
-  removeSection: (sectionId: string) => void
-  reorderSections: (activeId: string, overId: string) => void
+  addSection: (columnCount: 1 | 2 | 3) => void;
+  updateSection: (
+    sectionId: string,
+    changes: Partial<Omit<Section, "id" | "columns">>,
+  ) => void;
+  removeSection: (sectionId: string) => void;
+  reorderSections: (activeId: string, overId: string) => void;
 
-  renameTemplate: (name: string) => void
+  renameTemplate: (name: string) => void;
 
   // Block actions
-  addBlock: (sectionId: string, columnId: string, block: Omit<Block, 'id'>) => void
-  updateBlock: (sectionId: string, columnId: string, blockId: string, changes: Partial<Block>) => void
-  removeBlock: (sectionId: string, columnId: string, blockId: string) => void
-  reorderBlocks: (sectionId: string, columnId: string, activeId: string, overId: string) => void
+  addBlock: (
+    sectionId: string,
+    columnId: string,
+    block: Omit<Block, "id">,
+  ) => void;
+  updateBlock: (
+    sectionId: string,
+    columnId: string,
+    blockId: string,
+    changes: Partial<Block>,
+  ) => void;
+  removeBlock: (sectionId: string, columnId: string, blockId: string) => void;
+  reorderBlocks: (
+    sectionId: string,
+    columnId: string,
+    activeId: string,
+    overId: string,
+  ) => void;
 
   // Selection
-  select: (selection: SelectionState) => void
+  select: (selection: SelectionState) => void;
 
   // Global styles
-  updateGlobalStyles: (changes: Partial<GlobalStyles>) => void
+  updateGlobalStyles: (changes: Partial<GlobalStyles>) => void;
 
   // Template
-  setTemplate: (template: Template) => void
-}
+  setTemplate: (template: Template) => void;
+};
 
 function makeColumn(): Column {
-  return { id: uuid(), blocks: [] }
+  return { id: uuid(), blocks: [] };
 }
 
 function makeSection(columnCount: 1 | 2 | 3): Section {
   return {
     id: uuid(),
     columns: Array.from({ length: columnCount }, makeColumn),
-    bgColor: '#ffffff',
+    bgColor: "#ffffff",
     paddingTop: 16,
     paddingBottom: 16,
     paddingLeft: 24,
     paddingRight: 24,
-  }
+  };
 }
 
 const defaultTemplate: Template = {
   id: uuid(),
-  name: 'Untitled',
+  name: "Untitled",
   sections: [],
   globalStyles: {
-    fontFamily: 'Inter, sans-serif',
-    bgColor: '#f4f4f4',
+    fontFamily: "Inter, sans-serif",
+    bgColor: "#f4f4f4",
     contentWidth: 600,
   },
-}
+};
 
 export const useEditorStore = create<EditorStore>()(
   persist(
     (set) => ({
       template: defaultTemplate,
-      selection: { type: 'none' },
-      mode: 'edit',
+      selection: { type: "none" },
+      mode: "edit",
       previewTemplate: null,
-      previewWidth: 'desktop',
+      previewWidth: "desktop",
+
+      currentProjectId: null,
+      setCurrentProjectId: (id) => set({ currentProjectId: id }),
+
       setPreviewWidth: (width) => set({ previewWidth: width }),
 
       setMode: (mode) => set({ mode }),
@@ -100,7 +122,7 @@ export const useEditorStore = create<EditorStore>()(
           template: {
             ...state.template,
             sections: state.template.sections.map((s) =>
-              s.id === sectionId ? { ...s, ...changes } : s
+              s.id === sectionId ? { ...s, ...changes } : s,
             ),
           },
         })),
@@ -111,18 +133,18 @@ export const useEditorStore = create<EditorStore>()(
             ...state.template,
             sections: state.template.sections.filter((s) => s.id !== sectionId),
           },
-          selection: { type: 'none' },
+          selection: { type: "none" },
         })),
 
       reorderSections: (activeId, overId) =>
         set((state) => {
-          const sections = [...state.template.sections]
-          const oldIndex = sections.findIndex((s) => s.id === activeId)
-          const newIndex = sections.findIndex((s) => s.id === overId)
-          if (oldIndex === -1 || newIndex === -1) return state
-          const [moved] = sections.splice(oldIndex, 1)
-          sections.splice(newIndex, 0, moved)
-          return { template: { ...state.template, sections } }
+          const sections = [...state.template.sections];
+          const oldIndex = sections.findIndex((s) => s.id === activeId);
+          const newIndex = sections.findIndex((s) => s.id === overId);
+          if (oldIndex === -1 || newIndex === -1) return state;
+          const [moved] = sections.splice(oldIndex, 1);
+          sections.splice(newIndex, 0, moved);
+          return { template: { ...state.template, sections } };
         }),
 
       addBlock: (sectionId, columnId, block) =>
@@ -130,15 +152,22 @@ export const useEditorStore = create<EditorStore>()(
           template: {
             ...state.template,
             sections: state.template.sections.map((s) =>
-              s.id !== sectionId ? s : {
-                ...s,
-                columns: s.columns.map((c) =>
-                  c.id !== columnId ? c : {
-                    ...c,
-                    blocks: [...c.blocks, { ...block, id: uuid() } as Block],
-                  }
-                ),
-              }
+              s.id !== sectionId
+                ? s
+                : {
+                    ...s,
+                    columns: s.columns.map((c) =>
+                      c.id !== columnId
+                        ? c
+                        : {
+                            ...c,
+                            blocks: [
+                              ...c.blocks,
+                              { ...block, id: uuid() } as Block,
+                            ],
+                          },
+                    ),
+                  },
             ),
           },
         })),
@@ -148,17 +177,23 @@ export const useEditorStore = create<EditorStore>()(
           template: {
             ...state.template,
             sections: state.template.sections.map((s) =>
-              s.id !== sectionId ? s : {
-                ...s,
-                columns: s.columns.map((c) =>
-                  c.id !== columnId ? c : {
-                    ...c,
-                    blocks: c.blocks.map((b) =>
-                      b.id === blockId ? { ...b, ...changes } as Block : b
+              s.id !== sectionId
+                ? s
+                : {
+                    ...s,
+                    columns: s.columns.map((c) =>
+                      c.id !== columnId
+                        ? c
+                        : {
+                            ...c,
+                            blocks: c.blocks.map((b) =>
+                              b.id === blockId
+                                ? ({ ...b, ...changes } as Block)
+                                : b,
+                            ),
+                          },
                     ),
-                  }
-                ),
-              }
+                  },
             ),
           },
         })),
@@ -168,18 +203,22 @@ export const useEditorStore = create<EditorStore>()(
           template: {
             ...state.template,
             sections: state.template.sections.map((s) =>
-              s.id !== sectionId ? s : {
-                ...s,
-                columns: s.columns.map((c) =>
-                  c.id !== columnId ? c : {
-                    ...c,
-                    blocks: c.blocks.filter((b) => b.id !== blockId),
-                  }
-                ),
-              }
+              s.id !== sectionId
+                ? s
+                : {
+                    ...s,
+                    columns: s.columns.map((c) =>
+                      c.id !== columnId
+                        ? c
+                        : {
+                            ...c,
+                            blocks: c.blocks.filter((b) => b.id !== blockId),
+                          },
+                    ),
+                  },
             ),
           },
-          selection: { type: 'none' },
+          selection: { type: "none" },
         })),
 
       reorderBlocks: (sectionId, columnId, activeId, overId) =>
@@ -187,19 +226,23 @@ export const useEditorStore = create<EditorStore>()(
           template: {
             ...state.template,
             sections: state.template.sections.map((s) =>
-              s.id !== sectionId ? s : {
-                ...s,
-                columns: s.columns.map((c) => {
-                  if (c.id !== columnId) return c
-                  const blocks = [...c.blocks]
-                  const oldIndex = blocks.findIndex((b) => b.id === activeId)
-                  const newIndex = blocks.findIndex((b) => b.id === overId)
-                  if (oldIndex === -1 || newIndex === -1) return c
-                  const [moved] = blocks.splice(oldIndex, 1)
-                  blocks.splice(newIndex, 0, moved)
-                  return { ...c, blocks }
-                }),
-              }
+              s.id !== sectionId
+                ? s
+                : {
+                    ...s,
+                    columns: s.columns.map((c) => {
+                      if (c.id !== columnId) return c;
+                      const blocks = [...c.blocks];
+                      const oldIndex = blocks.findIndex(
+                        (b) => b.id === activeId,
+                      );
+                      const newIndex = blocks.findIndex((b) => b.id === overId);
+                      if (oldIndex === -1 || newIndex === -1) return c;
+                      const [moved] = blocks.splice(oldIndex, 1);
+                      blocks.splice(newIndex, 0, moved);
+                      return { ...c, blocks };
+                    }),
+                  },
             ),
           },
         })),
@@ -219,10 +262,10 @@ export const useEditorStore = create<EditorStore>()(
           },
         })),
 
-      setTemplate: (template) => set({ template, selection: { type: 'none' } }),
+      setTemplate: (template) => set({ template, selection: { type: "none" } }),
     }),
     {
       name: "dispatch-editor",
-    }
-  )
-)
+    },
+  ),
+);

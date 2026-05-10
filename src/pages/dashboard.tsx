@@ -24,7 +24,7 @@ import {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { setTemplate } = useEditorStore();
+  const { setTemplate, setCurrentProjectId } = useEditorStore();
   const [projects, setProjects] = useState<SavedTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -69,14 +69,14 @@ export default function Dashboard() {
         contentWidth: 600,
       },
     });
+    setCurrentProjectId(null);
     navigate("/editor");
   };
-
   const handleOpen = (project: SavedTemplate) => {
     setTemplate(project.data as Template);
+    setCurrentProjectId(project.id);
     navigate(`/editor/${project.id}`);
   };
-
   const handleDelete = async (id: string) => {
     try {
       await deleteTemplate(id);
