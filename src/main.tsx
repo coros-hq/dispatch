@@ -14,6 +14,7 @@ import ProtectedRoute from "./pages/auth/Protected.tsx";
 import { seedDefaultTemplates } from "./lib/seed.ts";
 import Dashboard from "./pages/dashboard.tsx";
 import ProfilePage from "./pages/profile.tsx";
+import NotFound from "./pages/not-found.tsx";
 
 const root = document.getElementById("root")!;
 root.classList.add("dark");
@@ -39,6 +40,7 @@ createRoot(root).render(
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="confirmation" element={<ConfirmEmail />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

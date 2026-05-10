@@ -43,7 +43,7 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
   return (
     <div
       onClick={onClick}
-      className="h-48 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent transition-all cursor-pointer group flex flex-col overflow-hidden"
+      className="h-48 rounded-xl border border-secondary bg-card hover:border-primary/50 hover:bg-accent transition-all cursor-pointer group flex flex-col overflow-hidden"
     >
       {/* Preview area */}
       <div className="flex-1 bg-muted flex items-center justify-center p-4 overflow-hidden">

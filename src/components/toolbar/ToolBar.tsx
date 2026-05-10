@@ -12,16 +12,28 @@ import {
   LogOutIcon,
   Redo2Icon,
   Undo2Icon,
+  MonitorIcon,
+  SmartphoneIcon,
+  MoreHorizontalIcon,
   UserIcon,
+  CodeIcon,
+  FileDownIcon,
+  LayoutTemplateIcon,
 } from "lucide-react";
 import SaveTemplateModal from "./SaveTemplateModal";
 import { updateTemplate } from "@/lib/template-service";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Toolbar() {
   const renameTemplate = useEditorStore((s) => s.renameTemplate);
   const { undo, redo, pastStates, futureStates } =
     useEditorStore.temporal.getState();
-
   const [copied, setCopied] = useState<"html" | "code" | null>(null);
   const {
     mode,
@@ -58,7 +70,6 @@ export default function Toolbar() {
 
   useEffect(() => {
     if (!currentProjectId) return;
-
     const interval = setInterval(async () => {
       setSaveStatus("saving");
       try {
@@ -69,12 +80,12 @@ export default function Toolbar() {
         setSaveStatus(null);
       }
     }, 30000);
-
     return () => clearInterval(interval);
   }, [currentProjectId, template]);
 
   return (
     <header className="h-12 bg-card flex items-center justify-between px-4 shrink-0">
+      {/* Left */}
       <div className="flex items-center gap-2">
         <Button
           variant="ghost"
@@ -84,6 +95,7 @@ export default function Toolbar() {
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </Button>
+        <Separator orientation="vertical" className="h-4" />
         <Button
           variant="ghost"
           size="icon"
@@ -102,18 +114,15 @@ export default function Toolbar() {
         >
           <Redo2Icon className="w-4 h-4" />
         </Button>
-        <div className="flex flex-row justify-center items-center gap-2">
-          <img src={Logo} alt="Dispatch Logo" className="w-8 h-8" />
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            Dispatch
-          </span>
-        </div>
         <Separator orientation="vertical" className="h-4" />
-        <input
-          value={template.name}
-          onChange={(e) => renameTemplate(e.target.value)}
-          className="text-xs text-muted-foreground bg-transparent border-b border-transparent focus:border-border focus:text-foreground outline-none transition-colors w-32"
-        />
+        <div className="flex items-center gap-2">
+          <img src={Logo} alt="Dispatch Logo" className="w-6 h-6" />
+          <input
+            value={template.name}
+            onChange={(e) => renameTemplate(e.target.value)}
+            className="text-sm text-foreground bg-transparent border-b border-transparent focus:border-border outline-none transition-colors w-32"
+          />
+        </div>
         {saveStatus === "saving" && (
           <span className="text-[10px] text-muted-foreground animate-pulse">
             Saving...
@@ -124,67 +133,77 @@ export default function Toolbar() {
         )}
       </div>
 
-      <div className="flex flex-row items-center gap-3">
-        <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
-          <Button
-            variant={previewWidth === "desktop" ? "secondary" : "ghost"}
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={() => setPreviewWidth("desktop")}
-          >
-            Desktop
-          </Button>
-          <Button
-            variant={previewWidth === "mobile" ? "secondary" : "ghost"}
-            size="sm"
-            className="h-7 px-2 text-xs"
-            onClick={() => setPreviewWidth("mobile")}
-          >
-            Mobile
-          </Button>
-        </div>
-        <Separator orientation="vertical" className="bg-white" />
+      {/* Center */}
+      <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
+        <Button
+          variant={previewWidth === "desktop" ? "secondary" : "ghost"}
+          size="sm"
+          className="h-7 px-2"
+          onClick={() => setPreviewWidth("desktop")}
+        >
+          <MonitorIcon className="w-3.5 h-3.5" />
+        </Button>
+        <Button
+          variant={previewWidth === "mobile" ? "secondary" : "ghost"}
+          size="sm"
+          className="h-7 px-2"
+          onClick={() => setPreviewWidth("mobile")}
+        >
+          <SmartphoneIcon className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+
+      {/* Right */}
+      <div className="flex items-center gap-2">
         <Button
           variant={mode === "preview" ? "default" : "outline"}
           size="sm"
           onClick={handleTemplates}
         >
+          <LayoutTemplateIcon className="w-3.5 h-3.5 mr-2" />
           Templates
         </Button>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => copy(templateToReactCode(template), "code")}
-        >
-          {copied === "code" ? "✓ Copied" : "Copy code"}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => copy(templateToHtml(template), "html")}
-        >
-          {copied === "html" ? "✓ Copied" : "Export HTML"}
-        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <MoreHorizontalIcon className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem
+              onClick={() => copy(templateToReactCode(template), "code")}
+            >
+              <CodeIcon className="w-4 h-4 mr-2" />
+              {copied === "code" ? "✓ Copied" : "Copy code"}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => copy(templateToHtml(template), "html")}
+            >
+              <FileDownIcon className="w-4 h-4 mr-2" />
+              {copied === "html" ? "✓ Copied" : "Export HTML"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/profile")}>
+              <UserIcon className="w-4 h-4 mr-2" />
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              className="text-destructive focus:text-destructive"
+            >
+              <LogOutIcon className="w-4 h-4 mr-2" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <SendTestModal />
         <SaveTemplateModal />
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/profile")}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <UserIcon className="w-4 h-4 mr-2" />
-            Profile
-          </Button>
-          <Separator orientation="vertical" className="h-4" />
-          <Button variant="destructive" size="sm" onClick={handleSignOut}>
-            Sign out
-            <LogOutIcon className="ml-1" />
-          </Button>
-        </div>
       </div>
     </header>
   );
