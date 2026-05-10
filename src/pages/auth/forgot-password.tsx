@@ -14,12 +14,15 @@ import AuthLines from "@/assets/auth-lines";
 import { forgotPasswordSchema } from "@/validation/auth";
 import { forgotPassword } from "@/lib/auth";
 import { toast } from "sonner";
+import { useState } from "react";
 
 type Props = {
   onSuccess?: () => void;
 };
 
 export default function ForgotPassword({ onSuccess }: Props) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -28,12 +31,15 @@ export default function ForgotPassword({ onSuccess }: Props) {
       onSubmit: forgotPasswordSchema,
     },
     onSubmit: async ({ value }) => {
+      setIsLoading(true);
       try {
         await forgotPassword(value.email);
         toast.success("Reset link sent — check your inbox");
         onSuccess?.();
       } catch (err: any) {
         toast.error(err.message ?? "Something went wrong");
+      } finally {
+        setIsLoading(false);
       }
     },
   });
@@ -96,8 +102,8 @@ export default function ForgotPassword({ onSuccess }: Props) {
             }}
           />
 
-          <Button type="submit" className="w-full mt-2">
-            Send reset link
+          <Button type="submit" className="w-full mt-2" disabled={isLoading}>
+            {isLoading ? "Sending..." : "Send reset link"}
           </Button>
         </form>
 

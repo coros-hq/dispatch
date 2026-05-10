@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EyeIcon, EyeOffIcon, LoaderIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +16,19 @@ import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { signInSchema } from "@/validation/auth";
 import { toast } from "sonner";
 import { signIn } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
+import { PASSWORD_RECOVERY_PENDING_KEY } from "@/store/auth";
 import { useNavigate } from "react-router";
 
 export default function SignIn() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const naviugate = useNavigate();
+
+  useEffect(() => {
+    if (!sessionStorage.getItem(PASSWORD_RECOVERY_PENDING_KEY)) return;
+    void supabase.auth.signOut();
+  }, []);
 
   const form = useForm({
     defaultValues: {
@@ -109,33 +116,41 @@ export default function SignIn() {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={isPasswordVisible ? "text" : "password"}
-                      placeholder="••••••••••••••••"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      className="pr-9"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      type="button"
-                      onClick={() => setIsPasswordVisible((v) => !v)}
-                      className="text-muted-foreground absolute inset-y-0 right-0 rounded-l-none hover:bg-transparent"
-                    >
-                      {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
-                    </Button>
+                <div className="flex flex-col gap-3 items-end w-full">
+                  <div className="flex flex-col gap-1.5 w-full">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={isPasswordVisible ? "text" : "password"}
+                        placeholder="••••••••••••••••"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="pr-9"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        onClick={() => setIsPasswordVisible((v) => !v)}
+                        className="text-muted-foreground absolute inset-y-0 right-0 rounded-l-none hover:bg-transparent"
+                      >
+                        {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
+                      </Button>
+                    </div>
+                    {isInvalid && (
+                      <p className="text-xs text-destructive">
+                        {field.state.meta.errors[0]?.message}
+                      </p>
+                    )}
                   </div>
-                  {isInvalid && (
-                    <p className="text-xs text-destructive">
-                      {field.state.meta.errors[0]?.message}
-                    </p>
-                  )}
+                  <a
+                    href="/forgot-password"
+                    className="text-foreground  underline cursor-pointer"
+                  >
+                    Forgot your password?
+                  </a>
                 </div>
               );
             }}

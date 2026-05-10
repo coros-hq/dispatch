@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { PlusIcon, LogOutIcon } from "lucide-react";
+import { PlusIcon, LogOutIcon, UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { fetchTemplates, deleteTemplate } from "@/lib/template-service";
@@ -93,23 +93,27 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted">
       {/* Header */}
-      <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6">
+      <header className="h-14 border-b border-white/20 flex items-center justify-between px-6">
         <div className="flex items-center gap-2.5">
           <img src={Logo} alt="Dispatch" className="w-7 h-7" />
           <span className="text-base font-semibold text-foreground">
             Dispatch
           </span>
-          <Separator className="text-white bg-white" orientation="vertical" />
-          <div className="space-y-0">
-            <p className="text-white font-semibold text-sm">
-              {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
-            </p>
-            <span className="text-xs  text-muted-foreground">
-              {user?.email}
-            </span>
-          </div>
+          <Separator
+            className="text-white bg-white/20"
+            orientation="vertical"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/profile")}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <UserIcon className="w-4 h-4 mr-2" />
+            Profile
+          </Button>
         </div>
         <div className="flex items-center gap-3">
           <Button
@@ -125,6 +129,10 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-10">
+        <h1 className="text-3xl mb-8 text-white font-semibold">
+          👋 Hello {user?.user_metadata?.first_name}{" "}
+          {user?.user_metadata?.last_name} !
+        </h1>
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">

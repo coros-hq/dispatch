@@ -10,10 +10,11 @@ import { useEditorStore } from "./store/editor";
 import Toolbar from "./components/toolbar/ToolBar";
 import { useEffect } from "react";
 import { updateTemplate } from "./lib/template-service";
+import { useUndoRedo } from "./hooks/useUndoRedo";
 
 export default function App() {
   const { template, currentProjectId, mode } = useEditorStore();
-
+  useUndoRedo();
   useEffect(() => {
     if (!currentProjectId) return;
 

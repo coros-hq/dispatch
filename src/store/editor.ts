@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { v4 as uuid } from "uuid";
 import type { Block, Column, GlobalStyles, Section, Template } from "../types";
 import { persist } from "zustand/middleware";
+import { temporal } from "zundo";
 
 type SelectionState =
   | { type: "none" }
@@ -93,179 +94,186 @@ const defaultTemplate: Template = {
 };
 
 export const useEditorStore = create<EditorStore>()(
-  persist(
-    (set) => ({
-      template: defaultTemplate,
-      selection: { type: "none" },
-      mode: "edit",
-      previewTemplate: null,
-      previewWidth: "desktop",
+  temporal(
+    persist(
+      (set) => ({
+        template: defaultTemplate,
+        selection: { type: "none" },
+        mode: "edit",
+        previewTemplate: null,
+        previewWidth: "desktop",
 
-      currentProjectId: null,
-      setCurrentProjectId: (id) => set({ currentProjectId: id }),
+        currentProjectId: null,
+        setCurrentProjectId: (id) => set({ currentProjectId: id }),
 
-      setPreviewWidth: (width) => set({ previewWidth: width }),
+        setPreviewWidth: (width) => set({ previewWidth: width }),
 
-      setMode: (mode) => set({ mode }),
-      setPreviewTemplate: (template) => set({ previewTemplate: template }),
+        setMode: (mode) => set({ mode }),
+        setPreviewTemplate: (template) => set({ previewTemplate: template }),
 
-      addSection: (columnCount) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            sections: [...state.template.sections, makeSection(columnCount)],
-          },
-        })),
+        addSection: (columnCount) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              sections: [...state.template.sections, makeSection(columnCount)],
+            },
+          })),
 
-      updateSection: (sectionId, changes) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            sections: state.template.sections.map((s) =>
-              s.id === sectionId ? { ...s, ...changes } : s,
-            ),
-          },
-        })),
+        updateSection: (sectionId, changes) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              sections: state.template.sections.map((s) =>
+                s.id === sectionId ? { ...s, ...changes } : s,
+              ),
+            },
+          })),
 
-      removeSection: (sectionId) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            sections: state.template.sections.filter((s) => s.id !== sectionId),
-          },
-          selection: { type: "none" },
-        })),
+        removeSection: (sectionId) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              sections: state.template.sections.filter(
+                (s) => s.id !== sectionId,
+              ),
+            },
+            selection: { type: "none" },
+          })),
 
-      reorderSections: (activeId, overId) =>
-        set((state) => {
-          const sections = [...state.template.sections];
-          const oldIndex = sections.findIndex((s) => s.id === activeId);
-          const newIndex = sections.findIndex((s) => s.id === overId);
-          if (oldIndex === -1 || newIndex === -1) return state;
-          const [moved] = sections.splice(oldIndex, 1);
-          sections.splice(newIndex, 0, moved);
-          return { template: { ...state.template, sections } };
-        }),
+        reorderSections: (activeId, overId) =>
+          set((state) => {
+            const sections = [...state.template.sections];
+            const oldIndex = sections.findIndex((s) => s.id === activeId);
+            const newIndex = sections.findIndex((s) => s.id === overId);
+            if (oldIndex === -1 || newIndex === -1) return state;
+            const [moved] = sections.splice(oldIndex, 1);
+            sections.splice(newIndex, 0, moved);
+            return { template: { ...state.template, sections } };
+          }),
 
-      addBlock: (sectionId, columnId, block) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            sections: state.template.sections.map((s) =>
-              s.id !== sectionId
-                ? s
-                : {
-                    ...s,
-                    columns: s.columns.map((c) =>
-                      c.id !== columnId
-                        ? c
-                        : {
-                            ...c,
-                            blocks: [
-                              ...c.blocks,
-                              { ...block, id: uuid() } as Block,
-                            ],
-                          },
-                    ),
-                  },
-            ),
-          },
-        })),
+        addBlock: (sectionId, columnId, block) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              sections: state.template.sections.map((s) =>
+                s.id !== sectionId
+                  ? s
+                  : {
+                      ...s,
+                      columns: s.columns.map((c) =>
+                        c.id !== columnId
+                          ? c
+                          : {
+                              ...c,
+                              blocks: [
+                                ...c.blocks,
+                                { ...block, id: uuid() } as Block,
+                              ],
+                            },
+                      ),
+                    },
+              ),
+            },
+          })),
 
-      updateBlock: (sectionId, columnId, blockId, changes) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            sections: state.template.sections.map((s) =>
-              s.id !== sectionId
-                ? s
-                : {
-                    ...s,
-                    columns: s.columns.map((c) =>
-                      c.id !== columnId
-                        ? c
-                        : {
-                            ...c,
-                            blocks: c.blocks.map((b) =>
-                              b.id === blockId
-                                ? ({ ...b, ...changes } as Block)
-                                : b,
-                            ),
-                          },
-                    ),
-                  },
-            ),
-          },
-        })),
+        updateBlock: (sectionId, columnId, blockId, changes) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              sections: state.template.sections.map((s) =>
+                s.id !== sectionId
+                  ? s
+                  : {
+                      ...s,
+                      columns: s.columns.map((c) =>
+                        c.id !== columnId
+                          ? c
+                          : {
+                              ...c,
+                              blocks: c.blocks.map((b) =>
+                                b.id === blockId
+                                  ? ({ ...b, ...changes } as Block)
+                                  : b,
+                              ),
+                            },
+                      ),
+                    },
+              ),
+            },
+          })),
 
-      removeBlock: (sectionId, columnId, blockId) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            sections: state.template.sections.map((s) =>
-              s.id !== sectionId
-                ? s
-                : {
-                    ...s,
-                    columns: s.columns.map((c) =>
-                      c.id !== columnId
-                        ? c
-                        : {
-                            ...c,
-                            blocks: c.blocks.filter((b) => b.id !== blockId),
-                          },
-                    ),
-                  },
-            ),
-          },
-          selection: { type: "none" },
-        })),
+        removeBlock: (sectionId, columnId, blockId) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              sections: state.template.sections.map((s) =>
+                s.id !== sectionId
+                  ? s
+                  : {
+                      ...s,
+                      columns: s.columns.map((c) =>
+                        c.id !== columnId
+                          ? c
+                          : {
+                              ...c,
+                              blocks: c.blocks.filter((b) => b.id !== blockId),
+                            },
+                      ),
+                    },
+              ),
+            },
+            selection: { type: "none" },
+          })),
 
-      reorderBlocks: (sectionId, columnId, activeId, overId) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            sections: state.template.sections.map((s) =>
-              s.id !== sectionId
-                ? s
-                : {
-                    ...s,
-                    columns: s.columns.map((c) => {
-                      if (c.id !== columnId) return c;
-                      const blocks = [...c.blocks];
-                      const oldIndex = blocks.findIndex(
-                        (b) => b.id === activeId,
-                      );
-                      const newIndex = blocks.findIndex((b) => b.id === overId);
-                      if (oldIndex === -1 || newIndex === -1) return c;
-                      const [moved] = blocks.splice(oldIndex, 1);
-                      blocks.splice(newIndex, 0, moved);
-                      return { ...c, blocks };
-                    }),
-                  },
-            ),
-          },
-        })),
+        reorderBlocks: (sectionId, columnId, activeId, overId) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              sections: state.template.sections.map((s) =>
+                s.id !== sectionId
+                  ? s
+                  : {
+                      ...s,
+                      columns: s.columns.map((c) => {
+                        if (c.id !== columnId) return c;
+                        const blocks = [...c.blocks];
+                        const oldIndex = blocks.findIndex(
+                          (b) => b.id === activeId,
+                        );
+                        const newIndex = blocks.findIndex(
+                          (b) => b.id === overId,
+                        );
+                        if (oldIndex === -1 || newIndex === -1) return c;
+                        const [moved] = blocks.splice(oldIndex, 1);
+                        blocks.splice(newIndex, 0, moved);
+                        return { ...c, blocks };
+                      }),
+                    },
+              ),
+            },
+          })),
 
-      renameTemplate: (name: string) =>
-        set((state) => ({
-          template: { ...state.template, name },
-        })),
+        renameTemplate: (name: string) =>
+          set((state) => ({
+            template: { ...state.template, name },
+          })),
 
-      select: (selection) => set({ selection }),
+        select: (selection) => set({ selection }),
 
-      updateGlobalStyles: (changes) =>
-        set((state) => ({
-          template: {
-            ...state.template,
-            globalStyles: { ...state.template.globalStyles, ...changes },
-          },
-        })),
+        updateGlobalStyles: (changes) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              globalStyles: { ...state.template.globalStyles, ...changes },
+            },
+          })),
 
-      setTemplate: (template) => set({ template, selection: { type: "none" } }),
-    }),
-    {
-      name: "dispatch-editor",
-    },
+        setTemplate: (template) =>
+          set({ template, selection: { type: "none" } }),
+      }),
+      {
+        name: "dispatch-editor",
+      },
+    ),
   ),
 );

@@ -1,11 +1,13 @@
 import Loader from "@/components/loader";
 import { useAuthStore } from "@/store/auth";
-import { Navigate, Outlet } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router";
 
 export default function AuthLayout() {
   const { user, loading } = useAuthStore();
+  const { pathname } = useLocation();
+  const onResetPassword = pathname === "/reset-password";
 
-  if (user) {
+  if (user && !onResetPassword) {
     return <Navigate to="/" replace />;
   }
 

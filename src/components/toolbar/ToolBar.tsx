@@ -7,12 +7,21 @@ import { Separator } from "@/components/ui/separator";
 import Logo from "@/assets/logo.svg";
 import { useNavigate } from "react-router";
 import { signOut } from "@/lib/auth";
-import { ArrowLeftIcon, LogOutIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  LogOutIcon,
+  Redo2Icon,
+  Undo2Icon,
+  UserIcon,
+} from "lucide-react";
 import SaveTemplateModal from "./SaveTemplateModal";
 import { updateTemplate } from "@/lib/template-service";
 
 export default function Toolbar() {
   const renameTemplate = useEditorStore((s) => s.renameTemplate);
+  const { undo, redo, pastStates, futureStates } =
+    useEditorStore.temporal.getState();
+
   const [copied, setCopied] = useState<"html" | "code" | null>(null);
   const {
     mode,
@@ -74,6 +83,24 @@ export default function Toolbar() {
           className="text-muted-foreground hover:text-foreground"
         >
           <ArrowLeftIcon className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => undo()}
+          disabled={pastStates.length === 0}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Undo2Icon className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => redo()}
+          disabled={futureStates.length === 0}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Redo2Icon className="w-4 h-4" />
         </Button>
         <div className="flex flex-row justify-center items-center gap-2">
           <img src={Logo} alt="Dispatch Logo" className="w-8 h-8" />
@@ -142,14 +169,22 @@ export default function Toolbar() {
         </Button>
         <SendTestModal />
         <SaveTemplateModal />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleSignOut}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <LogOutIcon className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/profile")}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <UserIcon className="w-4 h-4 mr-2" />
+            Profile
+          </Button>
+          <Separator orientation="vertical" className="h-4" />
+          <Button variant="destructive" size="sm" onClick={handleSignOut}>
+            Sign out
+            <LogOutIcon className="ml-1" />
+          </Button>
+        </div>
       </div>
     </header>
   );

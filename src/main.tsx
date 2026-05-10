@@ -13,6 +13,7 @@ import ResetPassword from "./pages/auth/reset-password.tsx";
 import ProtectedRoute from "./pages/auth/Protected.tsx";
 import { seedDefaultTemplates } from "./lib/seed.ts";
 import Dashboard from "./pages/dashboard.tsx";
+import ProfilePage from "./pages/profile.tsx";
 
 const root = document.getElementById("root")!;
 root.classList.add("dark");
@@ -26,6 +27,7 @@ createRoot(root).render(
 
       <Routes>
         <Route element={<ProtectedRoute />}>
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/" element={<Dashboard />} />
           <Route path="/editor" element={<App />} />
           <Route path="/editor/:id" element={<App />} />
