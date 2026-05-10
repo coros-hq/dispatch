@@ -22,7 +22,7 @@ seedDefaultTemplates();
 createRoot(root).render(
   <StrictMode>
     <BrowserRouter>
-      <Toaster richColors position="bottom-right" />
+      <Toaster position="top-right" />
 
       <Routes>
         <Route element={<ProtectedRoute />}>

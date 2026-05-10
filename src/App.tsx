@@ -8,9 +8,25 @@ import TemplatePanel from "./components/panel/TemplatePanel";
 import { Separator } from "@/components/ui/separator";
 import { useEditorStore } from "./store/editor";
 import Toolbar from "./components/toolbar/ToolBar";
+import { useEffect } from "react";
+import { updateTemplate } from "./lib/template-service";
 
 export default function App() {
-  const mode = useEditorStore((s) => s.mode);
+  const { template, currentProjectId, mode } = useEditorStore();
+
+  useEffect(() => {
+    if (!currentProjectId) return;
+
+    const interval = setInterval(async () => {
+      try {
+        await updateTemplate(currentProjectId, template, false);
+      } catch (err) {
+        console.error("Auto-save failed:", err);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [currentProjectId, template]);
 
   return (
     <DndProvider>
