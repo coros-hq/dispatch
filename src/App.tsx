@@ -1,17 +1,16 @@
-import BlockPanel from './components/panel/BlockPanel'
-import PropsPanel from './components/panel/PropsPanel'
-import Canvas from './components/canvas/Canvas'
-import DndProvider from './components/DndProvider'
-import CodePane from './components/editor/CodePane'
-import LinterPanel from './components/panel/LinterPanel'
-import TemplatePanel from './components/panel/TemplatePanel'
-import { Separator } from '@/components/ui/separator'
-import { useEditorStore } from './store/editor'
-import Toolbar from './components/toolbar/ToolBar'
+import BlockPanel from "./components/panel/BlockPanel";
+import PropsPanel from "./components/panel/PropsPanel";
+import Canvas from "./components/canvas/Canvas";
+import DndProvider from "./components/DndProvider";
+import CodePane from "./components/editor/CodePane";
+import LinterPanel from "./components/panel/LinterPanel";
+import TemplatePanel from "./components/panel/TemplatePanel";
+import { Separator } from "@/components/ui/separator";
+import { useEditorStore } from "./store/editor";
+import Toolbar from "./components/toolbar/ToolBar";
 
 export default function App() {
-  const mode = useEditorStore((s) => s.mode)
-
+  const mode = useEditorStore((s) => s.mode);
 
   return (
     <DndProvider>
@@ -19,7 +18,6 @@ export default function App() {
         <Toolbar />
         <Separator />
         <div className="flex flex-1 overflow-hidden">
-
           {/* Left — sections + block palette */}
           <aside className="w-48 border-r border-border bg-card shrink-0 overflow-y-auto">
             <BlockPanel />
@@ -28,14 +26,14 @@ export default function App() {
           {/* Center — canvas */}
           <main
             className="flex-1 overflow-y-auto bg-muted"
-            onClick={() => useEditorStore.getState().select({ type: 'none' })}
+            onClick={() => useEditorStore.getState().select({ type: "none" })}
           >
             <Canvas />
           </main>
 
           {/* Right — template gallery or editor panels */}
           <aside className="w-[380px] border-l border-border bg-card shrink-0 overflow-hidden flex flex-col">
-            {mode === 'preview' ? (
+            {mode === "preview" ? (
               <TemplatePanel />
             ) : (
               <>
@@ -53,9 +51,8 @@ export default function App() {
               </>
             )}
           </aside>
-
         </div>
       </div>
     </DndProvider>
-  )
+  );
 }

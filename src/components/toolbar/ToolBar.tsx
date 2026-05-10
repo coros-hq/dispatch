@@ -1,37 +1,57 @@
-import { useState } from 'react'
-import { useEditorStore } from '../../store/editor'
-import { templateToHtml, templateToReactCode } from '../../lib/renderer'
-import SendTestModal from './SendTestModal'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import Logo from "@/assets/logo.svg"
+import { useState } from "react";
+import { useEditorStore } from "../../store/editor";
+import { templateToHtml, templateToReactCode } from "../../lib/renderer";
+import SendTestModal from "./SendTestModal";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import Logo from "@/assets/logo.svg";
+import { useNavigate } from "react-router";
+import { signOut } from "@/lib/auth";
+import { ArrowLeftIcon, LogOutIcon } from "lucide-react";
+import SaveTemplateModal from "./SaveTemplateModal";
+
 export default function Toolbar() {
-  const template = useEditorStore((s) => s.template)
-  const renameTemplate = useEditorStore((s) => s.renameTemplate)
-  const [copied, setCopied] = useState<'html' | 'code' | null>(null)
-const { mode, setMode, setPreviewTemplate, previewWidth, setPreviewWidth } = useEditorStore()
+  const template = useEditorStore((s) => s.template);
+  const renameTemplate = useEditorStore((s) => s.renameTemplate);
+  const [copied, setCopied] = useState<"html" | "code" | null>(null);
+  const { mode, setMode, setPreviewTemplate, previewWidth, setPreviewWidth } =
+    useEditorStore();
+  const navigate = useNavigate();
 
-  const copy = (text: string, type: 'html' | 'code') => {
-    navigator.clipboard.writeText(text)
-    setCopied(type)
-    setTimeout(() => setCopied(null), 2000)
-  }
+  const copy = (text: string, type: "html" | "code") => {
+    navigator.clipboard.writeText(text);
+    setCopied(type);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
-const handleTemplates = () => {
-  if (mode === 'edit') {
-    setMode('preview')
-    setPreviewTemplate(null)
-  } else {
-    setMode('edit')
-    setPreviewTemplate(null)
-  }
-}
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/sign-in");
+  };
+
+  const handleTemplates = () => {
+    if (mode === "edit") {
+      setMode("preview");
+      setPreviewTemplate(null);
+    } else {
+      setMode("edit");
+      setPreviewTemplate(null);
+    }
+  };
 
   return (
     <header className="h-12 bg-card flex items-center justify-between px-4 shrink-0">
       <div className="flex items-center gap-2">
-        <div className='flex flex-row justify-center items-center gap-2'>
-          <img src={Logo} alt="Dispatch Logo" className='w-8 h-8' />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/")}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+        </Button>
+        <div className="flex flex-row justify-center items-center gap-2">
+          <img src={Logo} alt="Dispatch Logo" className="w-8 h-8" />
           <span className="text-lg font-semibold tracking-tight text-foreground">
             Dispatch
           </span>
@@ -42,27 +62,28 @@ const handleTemplates = () => {
           onChange={(e) => renameTemplate(e.target.value)}
           className="text-xs text-muted-foreground bg-transparent border-b border-transparent focus:border-border focus:text-foreground outline-none transition-colors w-32"
         />
+        <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
+          <Button
+            variant={previewWidth === "desktop" ? "secondary" : "ghost"}
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => setPreviewWidth("desktop")}
+          >
+            Desktop
+          </Button>
+          <Button
+            variant={previewWidth === "mobile" ? "secondary" : "ghost"}
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => setPreviewWidth("mobile")}
+          >
+            Mobile
+          </Button>
+        </div>
       </div>
-      <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
-  <Button
-    variant={previewWidth === 'desktop' ? 'secondary' : 'ghost'}
-    size="sm"
-    className="h-7 px-2 text-xs"
-    onClick={() => setPreviewWidth('desktop')}
-  >
-    Desktop
-  </Button>
-  <Button
-    variant={previewWidth === 'mobile' ? 'secondary' : 'ghost'}
-    size="sm"
-    className="h-7 px-2 text-xs"
-    onClick={() => setPreviewWidth('mobile')}
-  >
-    Mobile
-  </Button>
-</div>
+
       <Button
-        variant={mode === 'preview' ? 'default' : 'outline'}
+        variant={mode === "preview" ? "default" : "outline"}
         size="sm"
         onClick={handleTemplates}
       >
@@ -72,19 +93,28 @@ const handleTemplates = () => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => copy(templateToReactCode(template), 'code')}
+          onClick={() => copy(templateToReactCode(template), "code")}
         >
-          {copied === 'code' ? '✓ Copied' : 'Copy code'}
+          {copied === "code" ? "✓ Copied" : "Copy code"}
         </Button>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => copy(templateToHtml(template), 'html')}
+          onClick={() => copy(templateToHtml(template), "html")}
         >
-          {copied === 'html' ? '✓ Copied' : 'Export HTML'}
+          {copied === "html" ? "✓ Copied" : "Export HTML"}
         </Button>
         <SendTestModal />
+        <SaveTemplateModal />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleSignOut}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <LogOutIcon className="w-4 h-4" />
+        </Button>
       </div>
     </header>
-  )
+  );
 }
