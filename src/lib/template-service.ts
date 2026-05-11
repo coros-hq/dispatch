@@ -9,36 +9,39 @@ export type SavedTemplate = {
   is_public: boolean;
   is_default: boolean;
   user_id: string | null;
+  category: string;
   created_at: string;
   updated_at: string;
 };
 
 // Fetch all templates available to the user
 // (own templates + public templates + default templates)
-export async function fetchTemplates(search?: string): Promise<SavedTemplate[]> {
+export async function fetchTemplates(
+  search?: string,
+): Promise<SavedTemplate[]> {
   let query = supabase
-    .from('templates')
-    .select('*')
-    .order('created_at', { ascending: false })
+    .from("templates")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (search && search.trim()) {
-    query = query.ilike('name', `%${search}%`)
+    query = query.ilike("name", `%${search}%`);
   }
 
-  const { data, error } = await query
-  if (error) throw error
+  const { data, error } = await query;
+  if (error) throw error;
 
   // Migrate old format templates
   return (data as SavedTemplate[]).map((t) => ({
     ...t,
     data: migrateTemplate(t.data),
-  }))
+  }));
 }
 
-// Save a new template
 export async function saveTemplate(
   template: Template,
   isPublic: boolean,
+  category: string = "general",
 ): Promise<SavedTemplate> {
   const {
     data: { user },
@@ -53,6 +56,7 @@ export async function saveTemplate(
       is_public: isPublic,
       is_default: false,
       user_id: user.id,
+      category,
     })
     .select()
     .single();
@@ -61,20 +65,23 @@ export async function saveTemplate(
   return data as SavedTemplate;
 }
 
-// Update an existing template
 export async function updateTemplate(
   id: string,
   template: Template,
   isPublic: boolean,
+  category?: string,
 ): Promise<SavedTemplate> {
+  const updates: any = {
+    name: template.name,
+    data: template,
+    is_public: isPublic,
+    updated_at: new Date().toISOString(),
+  };
+  if (category) updates.category = category;
+
   const { data, error } = await supabase
     .from("templates")
-    .update({
-      name: template.name,
-      data: template,
-      is_public: isPublic,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updates)
     .eq("id", id)
     .select()
     .single();
@@ -122,4 +129,26 @@ export function migrateTemplate(data: any): Template {
     canvases: [canvas],
     activeCanvasId: canvas.id,
   };
+}
+
+export async function fetchPublicTemplates(
+  category?: string,
+): Promise<SavedTemplate[]> {
+  let query = supabase
+    .from("templates")
+    .select("*")
+    .or("is_default.eq.true,is_public.eq.true")
+    .order("created_at", { ascending: false });
+
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return (data as SavedTemplate[]).map((t) => ({
+    ...t,
+    data: migrateTemplate(t.data),
+  }));
 }

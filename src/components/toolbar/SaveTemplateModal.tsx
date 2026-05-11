@@ -1,7 +1,7 @@
+import { useState } from "react";
 import { useEditorStore } from "../../store/editor";
 import { saveTemplate, updateTemplate } from "@/lib/template-service";
 import { toast } from "sonner";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,11 +14,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const CATEGORIES = [
+  { value: "general", label: "General" },
+  { value: "newsletter", label: "Newsletter" },
+  { value: "marketing", label: "Marketing" },
+  { value: "outreach", label: "Outreach" },
+  { value: "transactional", label: "Transactional" },
+];
 
 export default function SaveTemplateModal() {
   const { template, currentProjectId, setCurrentProjectId } = useEditorStore();
   const renameTemplate = useEditorStore((s) => s.renameTemplate);
   const [isPublic, setIsPublic] = useState(false);
+  const [category, setCategory] = useState("general");
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -28,10 +44,10 @@ export default function SaveTemplateModal() {
     setSaving(true);
     try {
       if (isExisting) {
-        await updateTemplate(currentProjectId, template, isPublic);
+        await updateTemplate(currentProjectId, template, isPublic, category);
         toast.success("Project updated");
       } else {
-        const saved = await saveTemplate(template, isPublic);
+        const saved = await saveTemplate(template, isPublic, category);
         setCurrentProjectId(saved.id);
         toast.success("Project saved");
       }
@@ -72,12 +88,28 @@ export default function SaveTemplateModal() {
             />
           </div>
 
+          <div className="flex flex-col gap-1.5">
+            <Label>Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((c) => (
+                  <SelectItem key={c.value} value={c.value}>
+                    {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div className="flex flex-col gap-0.5">
               <p className="text-sm font-medium text-foreground">Make public</p>
               <p className="text-xs text-muted-foreground">
-                Public templates are visible to all users in the community
-                gallery
+                Public templates are visible to all users in the template
+                library
               </p>
             </div>
             <Switch checked={isPublic} onCheckedChange={setIsPublic} />

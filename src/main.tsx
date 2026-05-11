@@ -15,6 +15,7 @@ import { seedDefaultTemplates } from "./lib/seed.ts";
 import Dashboard from "./pages/dashboard.tsx";
 import ProfilePage from "./pages/profile.tsx";
 import NotFound from "./pages/not-found.tsx";
+import TemplatesPage from "./pages/templates.tsx";
 
 const root = document.getElementById("root")!;
 root.classList.add("dark");
@@ -32,6 +33,7 @@ createRoot(root).render(
           <Route path="/" element={<Dashboard />} />
           <Route path="/editor" element={<App />} />
           <Route path="/editor/:id" element={<App />} />
+          <Route path="/templates" element={<TemplatesPage />} />
         </Route>
         <Route element={<AuthLayout />}>
           <Route path="sign-in" element={<SignIn />} />

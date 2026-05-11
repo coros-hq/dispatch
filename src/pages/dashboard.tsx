@@ -171,10 +171,19 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleNew}>
-            <PlusIcon className="w-4 h-4 mr-2" />
-            New project
-          </Button>
+          <div className="flex flex-row items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/templates")}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Templates
+            </Button>
+            <Button onClick={handleNew}>
+              <PlusIcon className="w-4 h-4 mr-2" />
+              New project
+            </Button>
+          </div>
         </div>
 
         {/* Projects grid */}

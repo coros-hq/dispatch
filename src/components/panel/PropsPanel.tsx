@@ -308,6 +308,227 @@ export default function PropsPanel() {
             />
           </Field>
         )}
+
+        {block.type === "social" && (
+          <>
+            <Field label="Align">
+              <Select
+                value={block.align}
+                onValueChange={(v) =>
+                  update({ align: v as "left" | "center" | "right" })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Icon size">
+              <Input
+                type="number"
+                value={block.iconSize}
+                onChange={(e) => update({ iconSize: Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="Icon color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.iconColor}
+                onChange={(e) => update({ iconColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Links">
+              <div className="flex flex-col gap-2">
+                {block.links.map((link, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col gap-1.5 p-2 rounded-lg border border-border"
+                  >
+                    <Select
+                      value={link.platform}
+                      onValueChange={(v) => {
+                        const links = [...block.links];
+                        links[i] = { ...links[i], platform: v as any };
+                        update({ links });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="twitter">Twitter / X</SelectItem>
+                        <SelectItem value="linkedin">LinkedIn</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="github">GitHub</SelectItem>
+                        <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="youtube">YouTube</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder="https://"
+                      value={link.url}
+                      onChange={(e) => {
+                        const links = [...block.links];
+                        links[i] = { ...links[i], url: e.target.value };
+                        update({ links });
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        const links = block.links.filter((_, idx) => idx !== i);
+                        update({ links });
+                      }}
+                      className="text-xs text-destructive hover:underline text-left cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() =>
+                    update({
+                      links: [
+                        ...block.links,
+                        { platform: "twitter" as const, url: "" },
+                      ],
+                    })
+                  }
+                  className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  + Add link
+                </button>
+              </div>
+            </Field>
+          </>
+        )}
+
+        {block.type === "product-card" && (
+          <>
+            <Field label="Image URL">
+              <Input
+                value={block.image}
+                onChange={(e) => update({ image: e.target.value })}
+              />
+            </Field>
+            <Field label="Title">
+              <Input
+                value={block.title}
+                onChange={(e) => update({ title: e.target.value })}
+              />
+            </Field>
+            <Field label="Description">
+              <Textarea
+                className="resize-none h-16"
+                value={block.description}
+                onChange={(e) => update({ description: e.target.value })}
+              />
+            </Field>
+            <Field label="Price">
+              <Input
+                value={block.price}
+                onChange={(e) => update({ price: e.target.value })}
+              />
+            </Field>
+            <Field label="Button label">
+              <Input
+                value={block.buttonLabel}
+                onChange={(e) => update({ buttonLabel: e.target.value })}
+              />
+            </Field>
+            <Field label="Button URL">
+              <Input
+                value={block.buttonHref}
+                onChange={(e) => update({ buttonHref: e.target.value })}
+              />
+            </Field>
+            <Field label="Button background">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.buttonBgColor}
+                onChange={(e) => update({ buttonBgColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Button text color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.buttonTextColor}
+                onChange={(e) => update({ buttonTextColor: e.target.value })}
+              />
+            </Field>
+          </>
+        )}
+
+        {block.type === "unsubscribe" && (
+          <>
+            <Field label="Company name">
+              <Input
+                value={block.companyName}
+                onChange={(e) => update({ companyName: e.target.value })}
+              />
+            </Field>
+            <Field label="Address">
+              <Input
+                value={block.address}
+                onChange={(e) => update({ address: e.target.value })}
+              />
+            </Field>
+            <Field label="Unsubscribe URL">
+              <Input
+                value={block.unsubscribeUrl}
+                onChange={(e) => update({ unsubscribeUrl: e.target.value })}
+              />
+            </Field>
+            <Field label="Text color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.textColor}
+                onChange={(e) => update({ textColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Font size">
+              <Input
+                type="number"
+                value={block.fontSize}
+                onChange={(e) => update({ fontSize: Number(e.target.value) })}
+              />
+            </Field>
+          </>
+        )}
+
+        {block.type === "divider-text" && (
+          <>
+            <Field label="Text">
+              <Input
+                value={block.text}
+                onChange={(e) => update({ text: e.target.value })}
+              />
+            </Field>
+            <Field label="Color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.color}
+                onChange={(e) => update({ color: e.target.value })}
+              />
+            </Field>
+            <Field label="Font size">
+              <Input
+                type="number"
+                value={block.fontSize}
+                onChange={(e) => update({ fontSize: Number(e.target.value) })}
+              />
+            </Field>
+          </>
+        )}
       </div>
     );
   }

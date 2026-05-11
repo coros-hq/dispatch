@@ -44,7 +44,11 @@ export type Block =
   | ImageBlock
   | ButtonBlock
   | DividerBlock
-  | SpacerBlock;
+  | SpacerBlock
+  | SocialBlock
+  | ProductCardBlock
+  | UnsubscribeBlock
+  | DividerTextBlock;
 
 export type Column = {
   id: string;
@@ -79,4 +83,55 @@ export type Canvas = {
   name: string;
   sections: Section[];
   globalStyles: GlobalStyles;
+};
+
+export type SocialLink = {
+  platform:
+    | "twitter"
+    | "linkedin"
+    | "instagram"
+    | "github"
+    | "facebook"
+    | "youtube";
+  url: string;
+};
+
+export type SocialBlock = {
+  id: string;
+  type: "social";
+  links: SocialLink[];
+  align: "left" | "center" | "right";
+  iconSize: number;
+  iconColor: string;
+};
+
+export type ProductCardBlock = {
+  id: string;
+  type: "product-card";
+  image: string;
+  title: string;
+  description: string;
+  price: string;
+  buttonLabel: string;
+  buttonHref: string;
+  buttonBgColor: string;
+  buttonTextColor: string;
+};
+
+export type UnsubscribeBlock = {
+  id: string;
+  type: "unsubscribe";
+  companyName: string;
+  address: string;
+  unsubscribeUrl: string;
+  textColor: string;
+  fontSize: number;
+};
+
+export type DividerTextBlock = {
+  id: string;
+  type: "divider-text";
+  text: string;
+  color: string;
+  fontSize: number;
 };

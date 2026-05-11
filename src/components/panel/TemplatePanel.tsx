@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/auth";
 import type { Template } from "@/types";
 import { migrateTemplate } from "@/lib/template-service";
 import { TemplateCard } from "../canvas/TemplateCard";
+import { useNavigate } from "react-router";
 
 export default function TemplatePanel() {
   const { setMode, setPreviewTemplate } = useEditorStore();
@@ -17,6 +18,7 @@ export default function TemplatePanel() {
   const [selectedTemplate, setSelectedTemplate] =
     useState<SavedTemplate | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTemplates()
@@ -98,15 +100,17 @@ export default function TemplatePanel() {
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest px-1">
                   Starter
                 </p>
-                {defaultTemplates.map((t) => (
-                  <TemplateCard
-                    key={t.id}
-                    template={t}
-                    isSelected={selectedTemplate?.id === t.id}
-                    onClick={() => handleClick(t)}
-                    showDelete={false}
-                  />
-                ))}
+                <div className="grid grid-cols-2 gap-2">
+                  {defaultTemplates.map((t) => (
+                    <TemplateCard
+                      key={t.id}
+                      template={t}
+                      isSelected={selectedTemplate?.id === t.id}
+                      onClick={() => handleClick(t)}
+                      showDelete={false}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
@@ -159,6 +163,14 @@ export default function TemplatePanel() {
           size="sm"
         >
           Use this template
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/templates")}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          Check All Templates
         </Button>
         <Button
           onClick={handleCancel}
