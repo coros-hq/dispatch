@@ -3,7 +3,7 @@ import PropsPanel from "./components/panel/PropsPanel";
 import Canvas from "./components/canvas/Canvas";
 import DndProvider from "./components/DndProvider";
 import CodePane from "./components/editor/CodePane";
-import LinterPanel from "./components/panel/LinterPanel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TemplatePanel from "./components/panel/TemplatePanel";
 import { Separator } from "@/components/ui/separator";
 import { useEditorStore } from "./store/editor";
@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { updateTemplate } from "./lib/template-service";
 import { useUndoRedo } from "./hooks/useUndoRedo";
 import CanvasTabs from "./components/canvas/CanvasTabs";
+import CompatibilityReportPanel from "./components/panel/CompatibilityReport";
 
 export default function App() {
   const { template, currentProjectId, mode } = useEditorStore();
@@ -56,19 +57,37 @@ export default function App() {
             {mode === "preview" ? (
               <TemplatePanel />
             ) : (
-              <>
-                <div className="overflow-y-auto">
+              <Tabs defaultValue="props" className="flex flex-col h-full">
+                <TabsList className="w-full shrink-0 rounded-none border-b border-border justify-start px-2 h-10">
+                  <TabsTrigger value="props" className="text-xs">
+                    Properties
+                  </TabsTrigger>
+                  <TabsTrigger value="code" className="text-xs">
+                    Code
+                  </TabsTrigger>
+                  <TabsTrigger value="compatibility" className="text-xs">
+                    Compatibility
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent
+                  value="props"
+                  className="flex-1 overflow-y-auto m-0"
+                >
                   <PropsPanel />
-                </div>
-                <Separator />
-                <div className="h-[240px] shrink-0 overflow-hidden">
+                </TabsContent>
+                <TabsContent
+                  value="code"
+                  className="flex-1 overflow-hidden m-0"
+                >
                   <CodePane />
-                </div>
-                <Separator />
-                <div className="h-[200px] shrink-0 overflow-hidden">
-                  <LinterPanel />
-                </div>
-              </>
+                </TabsContent>
+                <TabsContent
+                  value="compatibility"
+                  className="flex-1 overflow-hidden m-0"
+                >
+                  <CompatibilityReportPanel />
+                </TabsContent>
+              </Tabs>
             )}
           </aside>
         </div>
