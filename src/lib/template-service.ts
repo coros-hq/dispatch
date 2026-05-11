@@ -15,21 +15,24 @@ export type SavedTemplate = {
 
 // Fetch all templates available to the user
 // (own templates + public templates + default templates)
-export async function fetchTemplates(
-  search?: string,
-): Promise<SavedTemplate[]> {
+export async function fetchTemplates(search?: string): Promise<SavedTemplate[]> {
   let query = supabase
-    .from("templates")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .from('templates')
+    .select('*')
+    .order('created_at', { ascending: false })
 
   if (search && search.trim()) {
-    query = query.ilike("name", `%${search}%`);
+    query = query.ilike('name', `%${search}%`)
   }
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return data as SavedTemplate[];
+  const { data, error } = await query
+  if (error) throw error
+
+  // Migrate old format templates
+  return (data as SavedTemplate[]).map((t) => ({
+    ...t,
+    data: migrateTemplate(t.data),
+  }))
 }
 
 // Save a new template
