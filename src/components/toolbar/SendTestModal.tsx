@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const url = import.meta.env.DEV ? "/api/resend/emails" : "/api/resend";
+
 export default function SendTestModal() {
   const { template } = useEditorStore();
   const [email, setEmail] = useState("");
@@ -41,11 +43,10 @@ export default function SendTestModal() {
       if (!canvas) throw new Error("Canvas not found");
 
       const html = canvasToHtml(canvas);
-      const res = await fetch("/api/resend/emails", {
+      const res = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
         },
         body: JSON.stringify({
           from: "dispatch@coros.click",
