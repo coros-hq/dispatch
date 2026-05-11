@@ -90,7 +90,7 @@ export default function Toolbar() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
           className="text-muted-foreground hover:text-foreground"
         >
           <ArrowLeftIcon className="w-4 h-4" />

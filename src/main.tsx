@@ -16,6 +16,7 @@ import Dashboard from "./pages/dashboard.tsx";
 import ProfilePage from "./pages/profile.tsx";
 import NotFound from "./pages/not-found.tsx";
 import TemplatesPage from "./pages/templates.tsx";
+import { Index } from "./pages/landing.tsx";
 
 const root = document.getElementById("root")!;
 root.classList.add("dark");
@@ -28,20 +29,27 @@ createRoot(root).render(
       <Toaster position="top-right" />
 
       <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Index />} />
+
+        {/* Auth routes */}
+        <Route element={<AuthLayout />}>
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/confirmation" element={<ConfirmEmail />} />
+        </Route>
+
+        {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/templates" element={<TemplatesPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/editor" element={<App />} />
           <Route path="/editor/:id" element={<App />} />
-          <Route path="/templates" element={<TemplatesPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
-        <Route element={<AuthLayout />}>
-          <Route path="sign-in" element={<SignIn />} />
-          <Route path="sign-up" element={<SignUp />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="reset-password" element={<ResetPassword />} />
-          <Route path="confirmation" element={<ConfirmEmail />} />
-        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

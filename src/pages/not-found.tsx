@@ -25,7 +25,9 @@ export default function NotFound() {
         >
           Go back
         </Button>
-        <Button onClick={() => navigate("/")}>Back to dashboard</Button>
+        <Button onClick={() => navigate("/dashboard")}>
+          Back to dashboard
+        </Button>
       </div>
     </div>
   );

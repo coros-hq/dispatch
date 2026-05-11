@@ -71,7 +71,7 @@ export default function TemplatesPage() {
         </div>
         <div className="flex items-center gap-3">
           {user ? (
-            <Button size="sm" onClick={() => navigate("/")}>
+            <Button size="sm" onClick={() => navigate("/dashboard")}>
               Dashboard
             </Button>
           ) : (

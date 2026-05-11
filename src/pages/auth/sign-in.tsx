@@ -44,7 +44,6 @@ export default function SignIn() {
       try {
         await signIn(value.email, value.password);
         toast.success("Signed in successfully");
-        naviugate("/");
       } catch (err: any) {
         toast.error(err.message ?? "Something went wrong");
       } finally {
