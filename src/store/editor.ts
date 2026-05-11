@@ -19,6 +19,8 @@ type EditorStore = {
   previewWidth: "desktop" | "mobile";
   currentProjectId: string | null;
 
+  replaceActiveCanvas: (canvas: Omit<Canvas, "id" | "name">) => void;
+
   // Canvas actions
   addCanvas: () => void;
   renameCanvas: (canvasId: string, name: string) => void;
@@ -141,6 +143,15 @@ export const useEditorStore = create<EditorStore>()(
         previewTemplate: null,
         previewWidth: "desktop",
         currentProjectId: null,
+
+        replaceActiveCanvas: (canvas) =>
+          set((state) => ({
+            template: updateActiveCanvas(state.template, {
+              sections: canvas.sections,
+              globalStyles: canvas.globalStyles,
+            }),
+            selection: { type: "none" },
+          })),
 
         addCanvas: () =>
           set((state) => {
