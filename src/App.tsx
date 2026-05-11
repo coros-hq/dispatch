@@ -11,6 +11,7 @@ import Toolbar from "./components/toolbar/ToolBar";
 import { useEffect } from "react";
 import { updateTemplate } from "./lib/template-service";
 import { useUndoRedo } from "./hooks/useUndoRedo";
+import CanvasTabs from "./components/canvas/CanvasTabs";
 
 export default function App() {
   const { template, currentProjectId, mode } = useEditorStore();
@@ -42,12 +43,14 @@ export default function App() {
 
           {/* Center — canvas */}
           <main
-            className="flex-1 overflow-y-auto bg-muted"
+            className="flex-1 overflow-hidden bg-muted flex flex-col"
             onClick={() => useEditorStore.getState().select({ type: "none" })}
           >
-            <Canvas />
+            <div className="flex-1 overflow-y-auto">
+              <Canvas />
+            </div>
+            <CanvasTabs />
           </main>
-
           {/* Right — template gallery or editor panels */}
           <aside className="w-[380px] border-l border-border bg-card shrink-0 overflow-hidden flex flex-col">
             {mode === "preview" ? (

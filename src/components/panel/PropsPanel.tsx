@@ -1,36 +1,52 @@
-import { useEditorStore } from '../../store/editor'
-import type { Block } from '../../types'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { getActiveCanvas, useEditorStore } from "../../store/editor";
+import type { Block } from "../../types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function PropsPanel() {
-  const { selection, template, updateBlock, updateGlobalStyles, updateSection } = useEditorStore()
+  const {
+    selection,
+    template,
+    updateBlock,
+    updateGlobalStyles,
+    updateSection,
+  } = useEditorStore();
+  const activeCanvas = getActiveCanvas(template);
 
-  if (selection.type === 'none') {
+  if (selection.type === "none") {
     return (
       <div className="p-4 flex flex-col gap-4">
-        <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">
+        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
           Global styles
         </p>
         <Field label="Canvas background">
           <input
             type="color"
-            className="w-full h-8 rounded cursor-pointer border border-border" value={template.globalStyles.bgColor}
+            className="w-full h-8 rounded cursor-pointer border border-border"
+            value={activeCanvas.globalStyles.bgColor}
             onChange={(e) => updateGlobalStyles({ bgColor: e.target.value })}
           />
         </Field>
         <Field label="Content width">
           <Input
             type="number"
-            value={template.globalStyles.contentWidth}
-            onChange={(e) => updateGlobalStyles({ contentWidth: Number(e.target.value) })}
+            value={activeCanvas.globalStyles.contentWidth}
+            onChange={(e) =>
+              updateGlobalStyles({ contentWidth: Number(e.target.value) })
+            }
           />
         </Field>
         <Field label="Font family">
           <Select
-            value={template.globalStyles.fontFamily}
+            value={activeCanvas.globalStyles.fontFamily}
             onValueChange={(v) => updateGlobalStyles({ fontFamily: v })}
           >
             <SelectTrigger>
@@ -40,18 +56,25 @@ export default function PropsPanel() {
               <SelectItem value="Inter, sans-serif">Inter</SelectItem>
               <SelectItem value="Arial, sans-serif">Arial</SelectItem>
               <SelectItem value="Georgia, serif">Georgia</SelectItem>
-              <SelectItem value="'Times New Roman', serif">Times New Roman</SelectItem>
-              <SelectItem value="'Courier New', monospace">Courier New</SelectItem>
+              <SelectItem value="'Times New Roman', serif">
+                Times New Roman
+              </SelectItem>
+              <SelectItem value="'Courier New', monospace">
+                Courier New
+              </SelectItem>
             </SelectContent>
           </Select>
         </Field>
       </div>
-    )
+    );
   }
 
-  if (selection.type === 'section') {
-    const section = template.sections.find((s) => s.id === selection.sectionId)
-    if (!section) return null
+  if (selection.type === "section") {
+    const section = activeCanvas.sections.find(
+      (s) => s.id === selection.sectionId,
+    );
+
+    if (!section) return null;
 
     return (
       <div className="p-4 flex flex-col gap-4">
@@ -63,49 +86,66 @@ export default function PropsPanel() {
             type="color"
             className="w-full h-8 rounded cursor-pointer"
             value={section.bgColor}
-            onChange={(e) => updateSection(section.id, { bgColor: e.target.value })}
+            onChange={(e) =>
+              updateSection(section.id, { bgColor: e.target.value })
+            }
           />
         </Field>
         <Field label="Padding top">
           <Input
             type="number"
             value={section.paddingTop}
-            onChange={(e) => updateSection(section.id, { paddingTop: Number(e.target.value) })}
+            onChange={(e) =>
+              updateSection(section.id, { paddingTop: Number(e.target.value) })
+            }
           />
         </Field>
         <Field label="Padding bottom">
           <Input
             type="number"
             value={section.paddingBottom}
-            onChange={(e) => updateSection(section.id, { paddingBottom: Number(e.target.value) })}
+            onChange={(e) =>
+              updateSection(section.id, {
+                paddingBottom: Number(e.target.value),
+              })
+            }
           />
         </Field>
         <Field label="Padding left">
           <Input
             type="number"
             value={section.paddingLeft}
-            onChange={(e) => updateSection(section.id, { paddingLeft: Number(e.target.value) })}
+            onChange={(e) =>
+              updateSection(section.id, { paddingLeft: Number(e.target.value) })
+            }
           />
         </Field>
         <Field label="Padding right">
           <Input
             type="number"
             value={section.paddingRight}
-            onChange={(e) => updateSection(section.id, { paddingRight: Number(e.target.value) })}
+            onChange={(e) =>
+              updateSection(section.id, {
+                paddingRight: Number(e.target.value),
+              })
+            }
           />
         </Field>
       </div>
-    )
+    );
   }
 
-  if (selection.type === 'block') {
-    const section = template.sections.find((s) => s.id === selection.sectionId)
-    const column = section?.columns.find((c) => c.id === selection.columnId)
-    const block = column?.blocks.find((b) => b.id === selection.blockId)
-    if (!block || !section || !column) return null
+  if (selection.type === "block") {
+    const section = activeCanvas.sections.find(
+      (s) => s.id === selection.sectionId,
+    );
+
+    const column = section?.columns.find((c) => c.id === selection.columnId);
+    const block = column?.blocks.find((b) => b.id === selection.blockId);
+    if (!block || !section || !column) return null;
 
     const update = (changes: Partial<Block>) =>
-      updateBlock(section.id, column.id, block.id, changes)
+      updateBlock(section.id, column.id, block.id, changes);
 
     return (
       <div className="p-4 flex flex-col gap-4">
@@ -113,7 +153,7 @@ export default function PropsPanel() {
           {block.type}
         </p>
 
-        {block.type === 'text' && (
+        {block.type === "text" && (
           <>
             <Field label="Content">
               <Textarea
@@ -140,7 +180,9 @@ export default function PropsPanel() {
             <Field label="Align">
               <Select
                 value={block.align}
-                onValueChange={(v) => update({ align: v as 'left' | 'center' | 'right' })}
+                onValueChange={(v) =>
+                  update({ align: v as "left" | "center" | "right" })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -155,7 +197,9 @@ export default function PropsPanel() {
             <Field label="Weight">
               <Select
                 value={block.fontWeight}
-                onValueChange={(v) => update({ fontWeight: v as 'normal' | 'bold' })}
+                onValueChange={(v) =>
+                  update({ fontWeight: v as "normal" | "bold" })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -169,7 +213,7 @@ export default function PropsPanel() {
           </>
         )}
 
-        {block.type === 'image' && (
+        {block.type === "image" && (
           <>
             <Field label="URL">
               <Input
@@ -193,7 +237,7 @@ export default function PropsPanel() {
           </>
         )}
 
-        {block.type === 'button' && (
+        {block.type === "button" && (
           <>
             <Field label="Label">
               <Input
@@ -227,13 +271,15 @@ export default function PropsPanel() {
               <Input
                 type="number"
                 value={block.borderRadius}
-                onChange={(e) => update({ borderRadius: Number(e.target.value) })}
+                onChange={(e) =>
+                  update({ borderRadius: Number(e.target.value) })
+                }
               />
             </Field>
           </>
         )}
 
-        {block.type === 'divider' && (
+        {block.type === "divider" && (
           <>
             <Field label="Color">
               <input
@@ -253,7 +299,7 @@ export default function PropsPanel() {
           </>
         )}
 
-        {block.type === 'spacer' && (
+        {block.type === "spacer" && (
           <Field label="Height">
             <Input
               type="number"
@@ -263,15 +309,21 @@ export default function PropsPanel() {
           </Field>
         )}
       </div>
-    )
+    );
   }
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <Label className="text-[11px] text-white/40">{label}</Label>
       {children}
     </div>
-  )
+  );
 }

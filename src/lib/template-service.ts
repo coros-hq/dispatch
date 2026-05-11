@@ -1,44 +1,49 @@
-import { supabase } from './supabase'
-import type { Template } from '../types'
+import { supabase } from "./supabase";
+import type { Template, Canvas } from "../types";
+import { v4 as uuid } from "uuid";
 
 export type SavedTemplate = {
-  id: string
-  name: string
-  data: Template
-  is_public: boolean
-  is_default: boolean
-  user_id: string | null
-  created_at: string
-  updated_at: string
-}
+  id: string;
+  name: string;
+  data: Template;
+  is_public: boolean;
+  is_default: boolean;
+  user_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
 
 // Fetch all templates available to the user
 // (own templates + public templates + default templates)
-export async function fetchTemplates(search?: string): Promise<SavedTemplate[]> {
+export async function fetchTemplates(
+  search?: string,
+): Promise<SavedTemplate[]> {
   let query = supabase
-    .from('templates')
-    .select('*')
-    .order('created_at', { ascending: false })
+    .from("templates")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (search && search.trim()) {
-    query = query.ilike('name', `%${search}%`)
+    query = query.ilike("name", `%${search}%`);
   }
 
-  const { data, error } = await query
-  if (error) throw error
-  return data as SavedTemplate[]
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as SavedTemplate[];
 }
 
 // Save a new template
 export async function saveTemplate(
   template: Template,
-  isPublic: boolean
+  isPublic: boolean,
 ): Promise<SavedTemplate> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
 
   const { data, error } = await supabase
-    .from('templates')
+    .from("templates")
     .insert({
       name: template.name,
       data: template,
@@ -47,50 +52,71 @@ export async function saveTemplate(
       user_id: user.id,
     })
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
-  return data as SavedTemplate
+  if (error) throw error;
+  return data as SavedTemplate;
 }
 
 // Update an existing template
 export async function updateTemplate(
   id: string,
   template: Template,
-  isPublic: boolean
+  isPublic: boolean,
 ): Promise<SavedTemplate> {
   const { data, error } = await supabase
-    .from('templates')
+    .from("templates")
     .update({
       name: template.name,
       data: template,
       is_public: isPublic,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', id)
+    .eq("id", id)
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
-  return data as SavedTemplate
+  if (error) throw error;
+  return data as SavedTemplate;
 }
 
 // Delete a template
 export async function deleteTemplate(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('templates')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from("templates").delete().eq("id", id);
 
-  if (error) throw error
+  if (error) throw error;
 }
 
 export async function renameTemplate(id: string, name: string): Promise<void> {
   const { error } = await supabase
-    .from('templates')
+    .from("templates")
     .update({ name, updated_at: new Date().toISOString() })
-    .eq('id', id)
+    .eq("id", id);
 
-  if (error) throw error
+  if (error) throw error;
 }
 
+// Migrate old template format to new canvas-based format
+export function migrateTemplate(data: any): Template {
+  // Already new format
+  if (data.canvases) return data as Template;
+
+  // Old format — wrap sections and globalStyles into a single canvas
+  const canvas: Canvas = {
+    id: uuid(),
+    name: "Canvas 1",
+    sections: data.sections ?? [],
+    globalStyles: data.globalStyles ?? {
+      fontFamily: "Inter, sans-serif",
+      bgColor: "#f4f4f4",
+      contentWidth: 600,
+    },
+  };
+
+  return {
+    id: data.id ?? uuid(),
+    name: data.name ?? "Untitled",
+    canvases: [canvas],
+    activeCanvasId: canvas.id,
+  };
+}

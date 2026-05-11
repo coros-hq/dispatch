@@ -1,36 +1,42 @@
 import {
   SortableContext,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { useEditorStore } from '../../store/editor'
-import SectionRow from './SectionRow'
+} from "@dnd-kit/sortable";
+import { useEditorStore, getActiveCanvas } from "../../store/editor";
+import SectionRow from "./SectionRow";
+import { migrateTemplate } from "@/lib/template-service";
 
 export default function Canvas() {
-  const { template, select, addSection, previewWidth, mode, previewTemplate } = useEditorStore()
+  const { template, select, addSection, mode, previewTemplate, previewWidth } =
+    useEditorStore();
 
+  const activeTemplate =
+    mode === "preview" && previewTemplate
+      ? migrateTemplate(previewTemplate)
+      : template;
 
-  const activeTemplate = mode === 'preview' && previewTemplate
-    ? previewTemplate
-    : template
-
-  const sections = activeTemplate.sections
-  const isPreview = (mode === 'preview')
+  const activeCanvas = getActiveCanvas(activeTemplate);
+  const sections = activeCanvas.sections;
+  const isPreview = mode === "preview";
 
   return (
     <div
       className="min-h-full flex flex-col items-center py-10 px-6"
-      onClick={() => !isPreview && select({ type: 'none' })}
+      onClick={() => !isPreview && select({ type: "none" })}
     >
       {isPreview && (
         <div className="mb-4 text-xs text-muted-foreground bg-card border border-border px-3 py-1.5 rounded-full">
-          Preview — hover a template on the right to see it here
+          Preview — click a template on the right to see it here
         </div>
       )}
       <div
-        className={`w-full shadow-2xl rounded-xl overflow-hidden ${isPreview ? 'pointer-events-none' : ''}`}
+        className={`w-full shadow-2xl rounded-xl overflow-hidden ${isPreview ? "pointer-events-none" : ""}`}
         style={{
-          maxWidth: previewWidth === 'mobile' ? 375 : activeTemplate.globalStyles.contentWidth,
-          backgroundColor: activeTemplate.globalStyles.bgColor,
+          maxWidth:
+            previewWidth === "mobile"
+              ? 375
+              : activeCanvas.globalStyles.contentWidth,
+          backgroundColor: activeCanvas.globalStyles.bgColor,
         }}
       >
         <SortableContext
@@ -65,5 +71,5 @@ export default function Canvas() {
         </SortableContext>
       </div>
     </div>
-  )
+  );
 }

@@ -59,15 +59,23 @@ export default function Dashboard() {
   }, [search, loadProjects]);
 
   const handleNew = () => {
+    const canvasId = crypto.randomUUID();
     setTemplate({
       id: crypto.randomUUID(),
       name: "Untitled",
-      sections: [],
-      globalStyles: {
-        fontFamily: "Inter, sans-serif",
-        bgColor: "#f4f4f4",
-        contentWidth: 600,
-      },
+      canvases: [
+        {
+          id: canvasId,
+          name: "Canvas 1",
+          sections: [],
+          globalStyles: {
+            fontFamily: "Inter, sans-serif",
+            bgColor: "#f4f4f4",
+            contentWidth: 600,
+          },
+        },
+      ],
+      activeCanvasId: canvasId,
     });
     setCurrentProjectId(null);
     navigate("/editor");

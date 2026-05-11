@@ -1,10 +1,10 @@
 import type { SavedTemplate } from "@/lib/template-service";
-import type { Template } from "@/types";
 import { GlobeIcon, LockIcon, Trash2Icon } from "lucide-react";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { useState, useRef } from "react";
-import { renameTemplate } from "@/lib/template-service";
+import { migrateTemplate, renameTemplate } from "@/lib/template-service";
 import { toast } from "sonner";
+import { getActiveCanvas } from "@/store/editor";
 
 type ProjectCardProps = {
   project: SavedTemplate;
@@ -13,7 +13,8 @@ type ProjectCardProps = {
 };
 
 export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
-  const template = project.data as Template;
+  const template = migrateTemplate(project.data);
+  const activeCanvas = getActiveCanvas(template);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [name, setName] = useState(project.name);
@@ -49,9 +50,9 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
       <div className="flex-1 bg-muted flex items-center justify-center p-4 overflow-hidden">
         <div
           className="w-full rounded scale-[0.6] origin-top"
-          style={{ backgroundColor: template.globalStyles.bgColor }}
+          style={{ backgroundColor: activeCanvas.globalStyles.bgColor }}
         >
-          {template.sections.slice(0, 2).map((section) => (
+          {activeCanvas.sections.slice(0, 2).map((section) => (
             <div
               key={section.id}
               style={{

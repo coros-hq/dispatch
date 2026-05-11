@@ -1,110 +1,150 @@
-import { useState } from 'react'
-import { useEditorStore } from '../../store/editor'
-import { templateToHtml } from '../../lib/renderer'
+import { useState } from "react";
+import { useEditorStore } from "../../store/editor";
+import { canvasToHtml } from "@/lib/renderer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
- } from "@/components/ui/dialog"
-import { Input } from '../ui/input'
-
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SendTestModal() {
-  const template = useEditorStore((s) => s.template)
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
-  const [showModal, setShowModal] = useState(false)
-
-  function onClose() {
-    setShowModal(false)
-    setEmail('')
-    setStatus('idle')
-  }
-
+  const { template } = useEditorStore();
+  const [email, setEmail] = useState("");
+  const canvases = template.canvases ?? [];
+  const [selectedCanvasId, setSelectedCanvasId] = useState(
+    template.activeCanvasId ?? "",
+  );
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle",
+  );
+  const [open, setOpen] = useState(false);
 
   const handleSend = async () => {
-    if (!email) return
-    setStatus('sending')
+    if (!email) return;
+    setStatus("sending");
 
     try {
-      const html = templateToHtml(template)
-      const res = await fetch('/api/resend/emails', {
-        method: 'POST',
+      const canvas = template.canvases.find((c) => c.id === selectedCanvasId);
+      if (!canvas) throw new Error("Canvas not found");
+
+      const html = canvasToHtml(canvas);
+      const res = await fetch("/api/resend/emails", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: 'dispatch@coros.click',
+          from: "dispatch@coros.click",
           to: email,
-          subject: `Test: ${template.name}`,
+          subject: `Test: ${template.name} — ${canvas.name}`,
           html,
         }),
-      })
+      });
 
       if (res.ok) {
-        setStatus('sent')
+        setStatus("sent");
       } else {
-        setStatus('error')
+        setStatus("error");
       }
     } catch {
-      setStatus('error')
+      setStatus("error");
     }
-  }
+  };
+
+  const handleOpenChange = (val: boolean) => {
+    setOpen(val);
+    if (val) {
+      setSelectedCanvasId(template.activeCanvasId);
+      setStatus("idle");
+      setEmail("");
+    }
+  };
 
   return (
-    <Dialog open={showModal} onOpenChange={onClose}>
-      <button
-        onClick={() => setShowModal(true)}
-        className="text-xs px-3 py-1.5 rounded-md bg-white text-black font-medium hover:bg-white/90 transition-colors cursor-pointer"
-      >
-        Send Test Email
-      </button>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          Send test
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Send test email </DialogTitle>
+          <DialogTitle>Send test email</DialogTitle>
           <DialogDescription>
-            Sends the current newsletter to your inbox
+            Choose which canvas to send and enter your email
           </DialogDescription>
         </DialogHeader>
-         {status === 'sent' ? (
+
+        {status === "sent" ? (
           <div className="text-xs text-green-400 text-center py-4">
             ✓ Email sent — check your inbox
           </div>
         ) : (
-          <>
-            <Input
-              type="email"
-              placeholder="your@email.com"
-              className="input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+          <div className="flex flex-col gap-4">
+            {canvases.length > 1 && (
+              <div className="flex flex-col gap-1.5">
+                <Label>Canvas</Label>
+                <Select
+                  value={selectedCanvasId}
+                  onValueChange={setSelectedCanvasId}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {canvases.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex flex-col gap-1.5">
+              <Label>Email address</Label>
+              <Input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-            {status === 'error' && (
-              <p className="text-xs text-red-400">Something went wrong. Check your API key.</p>
+            {status === "error" && (
+              <p className="text-xs text-destructive">
+                Something went wrong. Check your API key.
+              </p>
             )}
 
             <div className="flex gap-2 justify-end">
-              <button
-                onClick={onClose}
-                className="text-xs px-3 py-1.5 rounded-md border border-white/15 text-white/60 hover:text-white transition-colors cursor-pointer"
-              >
+              <Button variant="outline" onClick={() => setOpen(false)}>
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSend}
-                disabled={!email || status === 'sending'}
-                className="text-xs px-3 py-1.5 rounded-md bg-white text-black font-medium hover:bg-white/90 transition-colors disabled:opacity-50 cursor-pointer"
+                disabled={!email || status === "sending"}
               >
-                {status === 'sending' ? 'Sending...' : 'Send'}
-              </button>
+                {status === "sending" ? "Sending..." : "Send"}
+              </Button>
             </div>
-          </>
+          </div>
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }
