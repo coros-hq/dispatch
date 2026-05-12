@@ -18,12 +18,10 @@ import { toast } from "sonner";
 import { signIn } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { PASSWORD_RECOVERY_PENDING_KEY } from "@/store/auth";
-import { useNavigate } from "react-router";
 
 export default function SignIn() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const naviugate = useNavigate();
 
   useEffect(() => {
     if (!sessionStorage.getItem(PASSWORD_RECOVERY_PENDING_KEY)) return;
