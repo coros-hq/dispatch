@@ -18,10 +18,12 @@ import { toast } from "sonner";
 import { signIn } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { PASSWORD_RECOVERY_PENDING_KEY } from "@/store/auth";
+import { useNavigate } from "react-router";
 
 export default function SignIn() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!sessionStorage.getItem(PASSWORD_RECOVERY_PENDING_KEY)) return;
@@ -40,8 +42,11 @@ export default function SignIn() {
     onSubmit: async ({ value }) => {
       setIsLoading(true);
       try {
-        await signIn(value.email, value.password);
-        toast.success("Signed in successfully");
+        const res = await signIn(value.email, value.password);
+        if (res && res.session) {
+          toast.success("Signed in successfully");
+          navigate("/dashboard");
+        }
       } catch (err: any) {
         toast.error(err.message ?? "Something went wrong");
       } finally {
