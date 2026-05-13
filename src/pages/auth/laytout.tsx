@@ -8,7 +8,7 @@ export default function AuthLayout() {
   const onResetPassword = pathname === "/reset-password";
 
   if (user && !onResetPassword) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   if (loading) {
