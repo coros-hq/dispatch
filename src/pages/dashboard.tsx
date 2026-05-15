@@ -11,6 +11,7 @@ import { signOut } from "@/lib/auth";
 import { toast } from "sonner";
 import Logo from "@/assets/logo.svg";
 import type { Template } from "@/types";
+import { GOOGLE_FONT_PRESETS } from "@/lib/google-fonts";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Input } from "@/components/ui/input";
 import {
@@ -59,23 +60,35 @@ export default function Dashboard() {
   }, [search, loadProjects]);
 
   const handleNew = () => {
+    const pageId = crypto.randomUUID();
     const canvasId = crypto.randomUUID();
+    const inter = GOOGLE_FONT_PRESETS.find((p) => p.id === "inter")!;
     setTemplate({
       id: crypto.randomUUID(),
       name: "Untitled",
-      canvases: [
+      pages: [
         {
-          id: canvasId,
-          name: "Canvas 1",
-          sections: [],
-          globalStyles: {
-            fontFamily: "Inter, sans-serif",
-            bgColor: "#f4f4f4",
-            contentWidth: 600,
-          },
+          id: pageId,
+          name: "Page 1",
+          canvases: [
+            {
+              id: canvasId,
+              name: "Variant 1",
+              x: 0,
+              y: 0,
+              sections: [],
+              globalStyles: {
+                fontFamily: inter.fontFamily,
+                googleFontCssImportUrl: inter.importUrl,
+                bgColor: "#f4f4f4",
+                contentWidth: 600,
+              },
+            },
+          ],
+          activeCanvasId: canvasId,
         },
       ],
-      activeCanvasId: canvasId,
+      activePageId: pageId,
     });
     setCurrentProjectId(null);
     navigate("/editor");

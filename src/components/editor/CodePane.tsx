@@ -1,10 +1,11 @@
 import Editor from '@monaco-editor/react'
-import { useEditorStore } from '../../store/editor'
+import { useEditorStore, getActiveCanvas } from '../../store/editor'
 import { templateToReactCode } from '../../lib/renderer'
 
 export default function CodePane() {
   const template = useEditorStore((s) => s.template)
   const code = templateToReactCode(template)
+  const active = getActiveCanvas(template)
 
   return (
     <div className="flex flex-col h-full">
@@ -12,7 +13,9 @@ export default function CodePane() {
         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
           Code
         </span>
-        <span className="text-[10px] text-muted-foreground/50">React Email</span>
+        <span className="text-[10px] text-muted-foreground/50">
+          React Email · {active.name}
+        </span>
       </div>
       <div className="flex-1 overflow-hidden">
         <Editor

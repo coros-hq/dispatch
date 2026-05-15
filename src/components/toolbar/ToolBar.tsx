@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useEditorStore } from "../../store/editor";
-import { templateToHtml, templateToReactCode } from "../../lib/renderer";
+import {
+  templateToHtml,
+  templateToHtmlAllPages,
+  templateToReactCode,
+} from "../../lib/renderer";
 import SendTestModal from "./SendTestModal";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -34,7 +38,9 @@ export default function Toolbar() {
   const renameTemplate = useEditorStore((s) => s.renameTemplate);
   const { undo, redo, pastStates, futureStates } =
     useEditorStore.temporal.getState();
-  const [copied, setCopied] = useState<"html" | "code" | null>(null);
+  const [copied, setCopied] = useState<"html" | "html-all" | "code" | null>(
+    null,
+  );
   const {
     mode,
     setMode,
@@ -47,9 +53,12 @@ export default function Toolbar() {
   const navigate = useNavigate();
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | null>(null);
 
-  const copy = (text: string, type: "html" | "code") => {
+  const copy = (
+    text: string,
+    kind: "html" | "html-all" | "code",
+  ) => {
     navigator.clipboard.writeText(text);
-    setCopied(type);
+    setCopied(kind);
     setTimeout(() => setCopied(null), 2000);
   };
 
@@ -82,6 +91,11 @@ export default function Toolbar() {
     }, 30000);
     return () => clearInterval(interval);
   }, [currentProjectId, template]);
+
+  const allLayoutCount = template.pages.reduce(
+    (n, p) => n + p.canvases.length,
+    0,
+  );
 
   return (
     <header className="h-12 bg-card flex items-center justify-between px-4 shrink-0">
@@ -179,14 +193,26 @@ export default function Toolbar() {
               onClick={() => copy(templateToReactCode(template), "code")}
             >
               <CodeIcon className="w-4 h-4 mr-2" />
-              {copied === "code" ? "✓ Copied" : "Copy code"}
+              {copied === "code" ? "✓ Copied" : "Copy React code (active page)"}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => copy(templateToHtml(template), "html")}
             >
               <FileDownIcon className="w-4 h-4 mr-2" />
-              {copied === "html" ? "✓ Copied" : "Export HTML"}
+              {copied === "html" ? "✓ Copied" : "Export HTML (active page)"}
             </DropdownMenuItem>
+            {allLayoutCount > 1 && (
+              <DropdownMenuItem
+                onClick={() =>
+                  copy(templateToHtmlAllPages(template), "html-all")
+                }
+              >
+                <FileDownIcon className="w-4 h-4 mr-2" />
+                {copied === "html-all"
+                  ? "✓ Copied"
+                  : `Export HTML (all ${allLayoutCount} layouts)`}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/profile")}>
               <UserIcon className="w-4 h-4 mr-2" />
@@ -203,7 +229,9 @@ export default function Toolbar() {
         </DropdownMenu>
 
         <SendTestModal />
-        <SaveTemplateModal />
+        <span data-tour="toolbar-save">
+          <SaveTemplateModal />
+        </span>
       </div>
     </header>
   );

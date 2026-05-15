@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getActiveCanvas, useEditorStore } from "../../store/editor";
+import { useEditorStore } from "../../store/editor";
 import { fetchTemplates, deleteTemplate } from "@/lib/template-service";
 import type { SavedTemplate } from "@/lib/template-service";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,8 @@ import { TemplateCard } from "../canvas/TemplateCard";
 import { useNavigate } from "react-router";
 
 export default function TemplatePanel() {
-  const { setMode, setPreviewTemplate } = useEditorStore();
+  const { setMode, setPreviewTemplate, setTemplate, setCurrentProjectId } =
+    useEditorStore();
   const { user } = useAuthStore();
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] =
@@ -34,11 +35,9 @@ export default function TemplatePanel() {
 
   const handleUse = () => {
     if (!selectedTemplate) return;
-    const data = migrateTemplate(selectedTemplate.data);
-    const sourceCanvas = getActiveCanvas(data);
-
-    // Update only the active canvas content, keep other canvases
-    useEditorStore.getState().replaceActiveCanvas(sourceCanvas);
+    const data = migrateTemplate(selectedTemplate.data) as Template;
+    setTemplate(data);
+    setCurrentProjectId(null);
     setMode("edit");
     setPreviewTemplate(null);
   };

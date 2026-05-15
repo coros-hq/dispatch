@@ -1,18 +1,18 @@
 import { useState, useRef } from "react";
-import { useEditorStore, getActivePage } from "../../store/editor";
+import { useEditorStore } from "../../store/editor";
 import { PlusIcon, XIcon } from "lucide-react";
 import { ConfirmationDialog } from "../ConfirmationDialog";
 
-export default function CanvasTabs() {
-  const template = useEditorStore((s) => s.template);
+export default function PageTabs() {
   const {
-    setActiveCanvas,
-    addCanvas,
-    removeCanvas,
-    renameCanvas,
+    template,
+    setActivePage,
+    addPage,
+    removePage,
+    renamePage,
   } = useEditorStore();
-  const page = getActivePage(template);
-  const { canvases, activeCanvasId } = page;
+
+  const { pages, activePageId } = template;
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null);
@@ -26,31 +26,31 @@ export default function CanvasTabs() {
 
   const handleRenameSubmit = () => {
     if (renamingId && renameValue.trim()) {
-      renameCanvas(renamingId, renameValue.trim());
+      renamePage(renamingId, renameValue.trim());
     }
     setRenamingId(null);
   };
 
   return (
     <div
-      data-tour="variant-tabs"
-      className="h-10 border-t border-border bg-card flex items-center px-2 gap-1 overflow-x-auto shrink-0"
+      data-tour="page-tabs"
+      className="h-9 border-t border-border bg-muted/50 flex items-center px-2 gap-1 overflow-x-auto shrink-0"
     >
       <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest px-1.5 shrink-0">
-        Variants
+        Pages
       </span>
-      {canvases.map((canvas) => (
+      {pages.map((page) => (
         <div
-          key={canvas.id}
-          onClick={() => setActiveCanvas(canvas.id)}
-          onDoubleClick={() => handleDoubleClick(canvas.id, canvas.name)}
-          className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs cursor-pointer shrink-0 group transition-colors ${
-            canvas.id === activeCanvasId
-              ? "bg-accent text-foreground font-medium"
-              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+          key={page.id}
+          onClick={() => setActivePage(page.id)}
+          onDoubleClick={() => handleDoubleClick(page.id, page.name)}
+          className={`flex items-center gap-1.5 px-2.5 h-7 rounded-md text-xs cursor-pointer shrink-0 group transition-colors ${
+            page.id === activePageId
+              ? "bg-card border border-border text-foreground font-medium shadow-sm"
+              : "text-muted-foreground hover:bg-card/80 hover:text-foreground border border-transparent"
           }`}
         >
-          {renamingId === canvas.id ? (
+          {renamingId === page.id ? (
             <input
               ref={inputRef}
               value={renameValue}
@@ -64,29 +64,29 @@ export default function CanvasTabs() {
               className="bg-transparent outline-none border-b border-primary w-20 text-xs"
             />
           ) : (
-            <span>{canvas.name}</span>
+            <span>{page.name}</span>
           )}
 
-          {canvases.length > 1 && (
+          {pages.length > 1 && (
             <ConfirmationDialog
-              isOpen={deleteDialogId === canvas.id}
+              isOpen={deleteDialogId === page.id}
               onClose={() => setDeleteDialogId(null)}
-              title="Remove variant"
-              description={`Remove “${canvas.name}” from this page? This cannot be undone.`}
+              title="Delete page"
+              description={`Delete “${page.name}” and all its A/B variants? This cannot be undone.`}
               trigger={
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setDeleteDialogId(canvas.id);
+                    setDeleteDialogId(page.id);
                   }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive ml-1"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive ml-0.5"
                 >
                   <XIcon className="w-3 h-3" />
                 </button>
               }
               actionText="Delete"
               onAction={() => {
-                removeCanvas(canvas.id);
+                removePage(page.id);
                 setDeleteDialogId(null);
               }}
             />
@@ -95,8 +95,9 @@ export default function CanvasTabs() {
       ))}
 
       <button
-        onClick={addCanvas}
-        className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shrink-0 cursor-pointer"
+        onClick={addPage}
+        className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground transition-colors shrink-0 cursor-pointer border border-dashed border-border/80"
+        title="Add page"
       >
         <PlusIcon className="w-3.5 h-3.5" />
       </button>

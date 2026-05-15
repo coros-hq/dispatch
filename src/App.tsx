@@ -6,15 +6,17 @@ import {
 import Toolbar from "./components/toolbar/ToolBar";
 import BlockPanel from "./components/panel/BlockPanel";
 import PropsPanel from "./components/panel/PropsPanel";
-import Canvas from "./components/canvas/Canvas";
 import DndProvider from "./components/DndProvider";
 import CodePane from "./components/editor/CodePane";
-import CanvasTabs from "./components/canvas/CanvasTabs";
 import TemplatePanel from "./components/panel/TemplatePanel";
 import CompatibilityReport from "./components/panel/CompatibilityReport";
 import { Separator } from "@/components/ui/separator";
 import { useEditorStore } from "./store/editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import InfiniteCanvas from "./components/canvas/InfiniteCanvas";
+import CanvasTabs from "./components/canvas/CanvasTabs";
+import PageTabs from "./components/canvas/PageTabs";
+import Tour from "./components/onboarding/Tour";
 
 export default function App() {
   const mode = useEditorStore((s) => s.mode);
@@ -30,7 +32,10 @@ export default function App() {
         >
           {/* Left — block palette */}
           <ResizablePanel defaultSize={350} minSize={200} maxSize={350}>
-            <aside className="h-full bg-card overflow-y-auto">
+            <aside
+              className="h-full bg-card overflow-y-auto"
+              data-tour="right-panel"
+            >
               <BlockPanel />
             </aside>
           </ResizablePanel>
@@ -40,13 +45,14 @@ export default function App() {
           {/* Center — canvas */}
           <ResizablePanel defaultSize={20}>
             <main
-              className="h-full overflow-hidden bg-muted flex flex-col"
+              className="h-full min-h-0 overflow-hidden bg-muted flex flex-col"
               onClick={() => useEditorStore.getState().select({ type: "none" })}
             >
-              <div className="flex-1 overflow-y-auto">
-                <Canvas />
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <InfiniteCanvas />
               </div>
-              {mode !== "preview" && <CanvasTabs />}
+              <CanvasTabs />
+              <PageTabs />
             </main>
           </ResizablePanel>
 
@@ -94,6 +100,7 @@ export default function App() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+      <Tour />
     </DndProvider>
   );
 }

@@ -77,7 +77,8 @@ export default function CompatibilityReportPanel() {
           <div className="flex flex-col items-center gap-3 py-6">
             <p className="text-xs text-muted-foreground text-center">
               Run a compatibility check to see how your email renders across
-              clients
+              clients. Only the active page and variant are analyzed — switch
+              using the Variants and Pages bars below the canvas if needed.
             </p>
             <Button size="sm" onClick={handleGenerate} className="w-full">
               Run check

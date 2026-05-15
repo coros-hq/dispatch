@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useEditorStore } from "../../store/editor";
+import { useEditorStore, getActiveCanvas } from "../../store/editor";
 import { canvasToHtml } from "@/lib/renderer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,10 +25,14 @@ const url = import.meta.env.DEV ? "/api/resend/emails" : "/api/resend";
 export default function SendTestModal() {
   const { template } = useEditorStore();
   const [email, setEmail] = useState("");
-  const canvases = template.canvases ?? [];
-  const [selectedCanvasId, setSelectedCanvasId] = useState(
-    template.activeCanvasId ?? "",
+  const layoutOptions = template.pages.flatMap((page) =>
+    page.canvases.map((canvas) => ({
+      id: canvas.id,
+      label: `${page.name} · ${canvas.name}`,
+      canvas,
+    })),
   );
+  const [selectedCanvasId, setSelectedCanvasId] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
     "idle",
   );
@@ -39,10 +43,10 @@ export default function SendTestModal() {
     setStatus("sending");
 
     try {
-      const canvas = template.canvases.find((c) => c.id === selectedCanvasId);
-      if (!canvas) throw new Error("Canvas not found");
+      const found = layoutOptions.find((o) => o.id === selectedCanvasId);
+      if (!found) throw new Error("Layout not found");
 
-      const html = canvasToHtml(canvas);
+      const html = canvasToHtml(found.canvas);
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -51,7 +55,7 @@ export default function SendTestModal() {
         body: JSON.stringify({
           from: "dispatch@coros.click",
           to: email,
-          subject: `Test: ${template.name} — ${canvas.name}`,
+          subject: `Test: ${template.name} — ${found.label}`,
           html,
         }),
       });
@@ -69,7 +73,7 @@ export default function SendTestModal() {
   const handleOpenChange = (val: boolean) => {
     setOpen(val);
     if (val) {
-      setSelectedCanvasId(template.activeCanvasId);
+      setSelectedCanvasId(getActiveCanvas(template).id);
       setStatus("idle");
       setEmail("");
     }
@@ -86,7 +90,7 @@ export default function SendTestModal() {
         <DialogHeader>
           <DialogTitle>Send test email</DialogTitle>
           <DialogDescription>
-            Choose which canvas to send and enter your email
+            Choose which page / variant to send and enter your email
           </DialogDescription>
         </DialogHeader>
 
@@ -96,9 +100,9 @@ export default function SendTestModal() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {canvases.length > 1 && (
+            {layoutOptions.length > 1 && (
               <div className="flex flex-col gap-1.5">
-                <Label>Canvas</Label>
+                <Label>Layout</Label>
                 <Select
                   value={selectedCanvasId}
                   onValueChange={setSelectedCanvasId}
@@ -107,9 +111,9 @@ export default function SendTestModal() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {canvases.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
+                    {layoutOptions.map((o) => (
+                      <SelectItem key={o.id} value={o.id}>
+                        {o.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

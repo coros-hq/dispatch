@@ -2,7 +2,16 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { temporal } from "zundo";
 import { v4 as uuid } from "uuid";
-import type { Block, Canvas, GlobalStyles, Section, Template } from "../types";
+import type {
+  Block,
+  Canvas,
+  GlobalStyles,
+  Page,
+  Section,
+  Template,
+} from "../types";
+import { GOOGLE_FONT_PRESETS } from "../lib/google-fonts";
+import { migrateTemplate } from "../lib/template-service";
 
 type SelectionState =
   | { type: "none" }
@@ -18,10 +27,19 @@ type EditorStore = {
   previewTemplate: Template | null;
   previewWidth: "desktop" | "mobile";
   currentProjectId: string | null;
+  canvasCounter: number;
+  pageCounter: number;
 
+  // Page actions
+  addPage: () => void;
+  removePage: (pageId: string) => void;
+  renamePage: (pageId: string, name: string) => void;
+  setActivePage: (pageId: string) => void;
+  duplicatePage: (pageId: string) => void;
+
+  // Canvas actions (active page only)
+  updateCanvasPosition: (canvasId: string, x: number, y: number) => void;
   replaceActiveCanvas: (canvas: Omit<Canvas, "id" | "name">) => void;
-
-  // Canvas actions
   addCanvas: () => void;
   renameCanvas: (canvasId: string, name: string) => void;
   removeCanvas: (canvasId: string) => void;
@@ -38,8 +56,9 @@ type EditorStore = {
   addSection: (columnCount: 1 | 2 | 3) => void;
   updateSection: (
     sectionId: string,
-    changes: Partial<Omit<Section, "id" | "columns">>,
+    changes: Partial<Omit<Section, "id">>,
   ) => void;
+
   removeSection: (sectionId: string) => void;
   reorderSections: (activeId: string, overId: string) => void;
 
@@ -83,55 +102,99 @@ function makeSection(columnCount: 1 | 2 | 3): Section {
     id: uuid(),
     columns: Array.from({ length: columnCount }, makeColumn),
     bgColor: "#ffffff",
-    paddingTop: 16,
-    paddingBottom: 16,
-    paddingLeft: 24,
-    paddingRight: 24,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingLeft: 16,
+    paddingRight: 16,
   };
 }
 
-function makeCanvas(name = "Canvas 1"): Canvas {
+const defaultInter = GOOGLE_FONT_PRESETS.find((p) => p.id === "inter")!;
+
+function makeCanvas(name = "Variant 1", x = 0, y = 0): Canvas {
   return {
     id: uuid(),
     name,
+    x,
+    y,
     sections: [],
     globalStyles: {
-      fontFamily: "Inter, sans-serif",
+      fontFamily: defaultInter.fontFamily,
+      googleFontCssImportUrl: defaultInter.importUrl,
       bgColor: "#f4f4f4",
       contentWidth: 600,
     },
   };
 }
 
+function makeEmptyPage(name: string): Page {
+  const canvas = makeCanvas("Variant 1", 0, 0);
+  return {
+    id: uuid(),
+    name,
+    canvases: [canvas],
+    activeCanvasId: canvas.id,
+  };
+}
+
 const initialCanvas = makeCanvas();
+const initialPageId = uuid();
 
 const defaultTemplate: Template = {
   id: uuid(),
   name: "Untitled",
-  canvases: [initialCanvas],
-  activeCanvasId: initialCanvas.id,
+  pages: [
+    {
+      id: initialPageId,
+      name: "Page 1",
+      canvases: [initialCanvas],
+      activeCanvasId: initialCanvas.id,
+    },
+  ],
+  activePageId: initialPageId,
 };
 
-// Helper to get active canvas
-const getActiveCanvas = (template: Template): Canvas => {
+export function getActivePage(template: Template): Page {
+  const p = template.pages.find((x) => x.id === template.activePageId);
+  return p ?? template.pages[0];
+}
+
+export function getActiveCanvas(template: Template): Canvas {
+  const page = getActivePage(template);
   return (
-    template.canvases.find((c) => c.id === template.activeCanvasId) ??
-    template.canvases[0]
+    page.canvases.find((c) => c.id === page.activeCanvasId) ??
+    page.canvases[0]
   );
-};
+}
 
-// Helper to update active canvas
-const updateActiveCanvas = (
+function updateActiveCanvasInTemplate(
   template: Template,
   changes: Partial<Canvas>,
-): Template => {
+): Template {
+  const pid = template.activePageId;
+  const page = getActivePage(template);
+  const cid = page.activeCanvasId;
   return {
     ...template,
-    canvases: template.canvases.map((c) =>
-      c.id === template.activeCanvasId ? { ...c, ...changes } : c,
+    pages: template.pages.map((p) =>
+      p.id !== pid
+        ? p
+        : {
+            ...p,
+            canvases: p.canvases.map((c) =>
+              c.id === cid ? { ...c, ...changes } : c,
+            ),
+          },
     ),
   };
-};
+}
+
+function maxCanvasesAcrossPages(template: Template): number {
+  return template.pages.reduce(
+    (m, p) => Math.max(m, p.canvases.length),
+    0,
+  );
+}
 
 export const useEditorStore = create<EditorStore>()(
   temporal(
@@ -143,10 +206,121 @@ export const useEditorStore = create<EditorStore>()(
         previewTemplate: null,
         previewWidth: "desktop",
         currentProjectId: null,
+        canvasCounter: 1,
+        pageCounter: 1,
+
+        addPage: () =>
+          set((state) => {
+            const n = state.template.pages.length + 1;
+            const newPage = makeEmptyPage(`Page ${n}`);
+            return {
+              template: {
+                ...state.template,
+                pages: [...state.template.pages, newPage],
+                activePageId: newPage.id,
+              },
+              pageCounter: Math.max(state.pageCounter, n),
+              selection: { type: "none" },
+            };
+          }),
+
+        removePage: (pageId) =>
+          set((state) => {
+            if (state.template.pages.length <= 1) return state;
+            const remaining = state.template.pages.filter(
+              (p) => p.id !== pageId,
+            );
+            const activePageId =
+              state.template.activePageId === pageId
+                ? remaining[0].id
+                : state.template.activePageId;
+            return {
+              template: {
+                ...state.template,
+                pages: remaining,
+                activePageId,
+              },
+              selection: { type: "none" },
+            };
+          }),
+
+        renamePage: (pageId, name) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              pages: state.template.pages.map((p) =>
+                p.id === pageId ? { ...p, name } : p,
+              ),
+            },
+          })),
+
+        setActivePage: (pageId) =>
+          set((state) => ({
+            template: { ...state.template, activePageId: pageId },
+            selection: { type: "none" },
+          })),
+
+        duplicatePage: (pageId) =>
+          set((state) => {
+            const page = state.template.pages.find((p) => p.id === pageId);
+            if (!page) return state;
+            const acIdx = Math.max(
+              0,
+              page.canvases.findIndex((c) => c.id === page.activeCanvasId),
+            );
+            const newPage: Page = {
+              id: uuid(),
+              name: `${page.name} (copy)`,
+              canvases: page.canvases.map((c) => ({
+                ...c,
+                id: uuid(),
+                sections: c.sections.map((s) => ({
+                  ...s,
+                  id: uuid(),
+                  columns: s.columns.map((col) => ({
+                    ...col,
+                    id: uuid(),
+                    blocks: col.blocks.map(
+                      (b) => ({ ...b, id: uuid() }) as Block,
+                    ),
+                  })),
+                })),
+              })),
+              activeCanvasId: "",
+            };
+            const dupIdx = Math.min(acIdx, newPage.canvases.length - 1);
+            newPage.activeCanvasId = newPage.canvases[dupIdx]!.id;
+            const index = state.template.pages.findIndex(
+              (p) => p.id === pageId,
+            );
+            const pages = [...state.template.pages];
+            pages.splice(index + 1, 0, newPage);
+            return {
+              template: {
+                ...state.template,
+                pages,
+                activePageId: newPage.id,
+              },
+              selection: { type: "none" },
+            };
+          }),
+
+        updateCanvasPosition: (canvasId, x, y) =>
+          set((state) => ({
+            template: {
+              ...state.template,
+              pages: state.template.pages.map((p) => ({
+                ...p,
+                canvases: p.canvases.map((c) =>
+                  c.id === canvasId ? { ...c, x, y } : c,
+                ),
+              })),
+            },
+          })),
 
         replaceActiveCanvas: (canvas) =>
           set((state) => ({
-            template: updateActiveCanvas(state.template, {
+            template: updateActiveCanvasInTemplate(state.template, {
               sections: canvas.sections,
               globalStyles: canvas.globalStyles,
             }),
@@ -155,14 +329,27 @@ export const useEditorStore = create<EditorStore>()(
 
         addCanvas: () =>
           set((state) => {
-            const count = state.template.canvases.length + 1;
-            const newCanvas = makeCanvas(`Canvas ${count}`);
+            const page = getActivePage(state.template);
+            const canvases = page.canvases;
+            const nextN = canvases.length + 1;
+            const totalWidth = canvases.reduce((acc, c) => {
+              return acc + (c.globalStyles?.contentWidth ?? 600) + 80;
+            }, 0);
+            const newCanvas = makeCanvas(`Variant ${nextN}`, totalWidth, 0);
             return {
               template: {
                 ...state.template,
-                canvases: [...state.template.canvases, newCanvas],
-                activeCanvasId: newCanvas.id,
+                pages: state.template.pages.map((p) =>
+                  p.id !== page.id
+                    ? p
+                    : {
+                        ...p,
+                        canvases: [...p.canvases, newCanvas],
+                        activeCanvasId: newCanvas.id,
+                      },
+                ),
               },
+              canvasCounter: Math.max(state.canvasCounter, nextN),
             };
           }),
 
@@ -170,42 +357,53 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => ({
             template: {
               ...state.template,
-              canvases: state.template.canvases.map((c) =>
-                c.id === canvasId ? { ...c, name } : c,
-              ),
+              pages: state.template.pages.map((p) => ({
+                ...p,
+                canvases: p.canvases.map((c) =>
+                  c.id === canvasId ? { ...c, name } : c,
+                ),
+              })),
             },
           })),
 
         removeCanvas: (canvasId) =>
           set((state) => {
-            if (state.template.canvases.length <= 1) return state;
-            const remaining = state.template.canvases.filter(
-              (c) => c.id !== canvasId,
-            );
+            const page = getActivePage(state.template);
+            if (page.canvases.length <= 1) return state;
+            const remaining = page.canvases.filter((c) => c.id !== canvasId);
             const activeCanvasId =
-              state.template.activeCanvasId === canvasId
+              page.activeCanvasId === canvasId
                 ? remaining[0].id
-                : state.template.activeCanvasId;
+                : page.activeCanvasId;
             return {
               template: {
                 ...state.template,
-                canvases: remaining,
-                activeCanvasId,
+                pages: state.template.pages.map((p) =>
+                  p.id !== page.id
+                    ? p
+                    : { ...p, canvases: remaining, activeCanvasId },
+                ),
               },
             };
           }),
 
         setActiveCanvas: (canvasId) =>
           set((state) => ({
-            template: { ...state.template, activeCanvasId: canvasId },
+            template: {
+              ...state.template,
+              pages: state.template.pages.map((p) =>
+                p.id !== state.template.activePageId
+                  ? p
+                  : { ...p, activeCanvasId: canvasId },
+              ),
+            },
             selection: { type: "none" },
           })),
 
         duplicateCanvas: (canvasId) =>
           set((state) => {
-            const canvas = state.template.canvases.find(
-              (c) => c.id === canvasId,
-            );
+            const page = getActivePage(state.template);
+            const canvas = page.canvases.find((c) => c.id === canvasId);
             if (!canvas) return state;
             const duplicate: Canvas = {
               ...canvas,
@@ -217,20 +415,21 @@ export const useEditorStore = create<EditorStore>()(
                 columns: s.columns.map((col) => ({
                   ...col,
                   id: uuid(),
-                  blocks: col.blocks.map((b) => ({ ...b, id: uuid() })),
+                  blocks: col.blocks.map((b) => ({ ...b, id: uuid() }) as Block),
                 })),
               })),
             };
-            const index = state.template.canvases.findIndex(
-              (c) => c.id === canvasId,
-            );
-            const canvases = [...state.template.canvases];
+            const index = page.canvases.findIndex((c) => c.id === canvasId);
+            const canvases = [...page.canvases];
             canvases.splice(index + 1, 0, duplicate);
             return {
               template: {
                 ...state.template,
-                canvases,
-                activeCanvasId: duplicate.id,
+                pages: state.template.pages.map((p) =>
+                  p.id !== page.id
+                    ? p
+                    : { ...p, canvases, activeCanvasId: duplicate.id },
+                ),
               },
             };
           }),
@@ -244,7 +443,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 sections: [...active.sections, makeSection(columnCount)],
               }),
             };
@@ -254,7 +453,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 sections: active.sections.map((s) =>
                   s.id === sectionId ? { ...s, ...changes } : s,
                 ),
@@ -266,7 +465,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 sections: active.sections.filter((s) => s.id !== sectionId),
               }),
               selection: { type: "none" },
@@ -283,7 +482,9 @@ export const useEditorStore = create<EditorStore>()(
             const [moved] = sections.splice(oldIndex, 1);
             sections.splice(newIndex, 0, moved);
             return {
-              template: updateActiveCanvas(state.template, { sections }),
+              template: updateActiveCanvasInTemplate(state.template, {
+                sections,
+              }),
             };
           }),
 
@@ -291,7 +492,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 sections: active.sections.map((s) =>
                   s.id !== sectionId
                     ? s
@@ -318,7 +519,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 sections: active.sections.map((s) =>
                   s.id !== sectionId
                     ? s
@@ -346,7 +547,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 sections: active.sections.map((s) =>
                   s.id !== sectionId
                     ? s
@@ -373,7 +574,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 sections: active.sections.map((s) =>
                   s.id !== sectionId
                     ? s
@@ -405,14 +606,28 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => {
             const active = getActiveCanvas(state.template);
             return {
-              template: updateActiveCanvas(state.template, {
+              template: updateActiveCanvasInTemplate(state.template, {
                 globalStyles: { ...active.globalStyles, ...changes },
               }),
             };
           }),
 
         setTemplate: (template) =>
-          set({ template, selection: { type: "none" } }),
+          set((state) => {
+            const migrated = migrateTemplate(template as any);
+            return {
+              template: migrated,
+              selection: { type: "none" },
+              canvasCounter: Math.max(
+                state.canvasCounter,
+                maxCanvasesAcrossPages(migrated),
+              ),
+              pageCounter: Math.max(
+                state.pageCounter,
+                migrated.pages.length,
+              ),
+            };
+          }),
 
         renameTemplate: (name) =>
           set((state) => ({ template: { ...state.template, name } })),
@@ -420,26 +635,29 @@ export const useEditorStore = create<EditorStore>()(
       {
         name: "dispatch-editor",
         onRehydrateStorage: () => (state) => {
-          if (!state) return;
-          const t = state.template as any;
-          if (!t.canvases) {
-            const canvas = {
-              id: crypto.randomUUID(),
-              name: "Canvas 1",
-              sections: t.sections ?? [],
-              globalStyles: t.globalStyles ?? {
-                fontFamily: "Inter, sans-serif",
-                bgColor: "#f4f4f4",
-                contentWidth: 600,
-              },
-            };
-            state.template = {
-              id: t.id,
-              name: t.name,
-              canvases: [canvas],
-              activeCanvasId: canvas.id,
-            };
-          }
+          if (!state?.template) return;
+          state.template = migrateTemplate(state.template as any);
+          state.template.pages = state.template.pages.map((p) => ({
+            ...p,
+            canvases: p.canvases.map((c: Canvas) => {
+              const gs = { ...c.globalStyles };
+              if (!gs.googleFontCssImportUrl) {
+                const byStack = GOOGLE_FONT_PRESETS.find(
+                  (x) => x.fontFamily === gs.fontFamily,
+                );
+                if (byStack) {
+                  gs.googleFontCssImportUrl = byStack.importUrl;
+                } else if (
+                  /^inter\b/i.test(gs.fontFamily) &&
+                  gs.fontFamily.toLowerCase().includes("sans-serif")
+                ) {
+                  gs.fontFamily = defaultInter.fontFamily;
+                  gs.googleFontCssImportUrl = defaultInter.importUrl;
+                }
+              }
+              return { ...c, globalStyles: gs };
+            }),
+          }));
         },
       },
     ),
@@ -447,5 +665,3 @@ export const useEditorStore = create<EditorStore>()(
 );
 
 export const useEditorHistory = useEditorStore.temporal;
-
-export { getActiveCanvas };

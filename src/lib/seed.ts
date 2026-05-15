@@ -1,19 +1,9 @@
 import { supabase } from "./supabase";
-import { STARTER_TEMPLATES } from "./templates";
+import {
+  STARTER_TEMPLATES,
+  STARTER_TEMPLATE_CATEGORIES,
+} from "./templates";
 import { migrateTemplate } from "./template-service";
-
-const TEMPLATE_CATEGORIES: Record<string, string> = {
-  Minimal: "newsletter",
-  "Product Launch": "marketing",
-  "Weekly Digest": "newsletter",
-  "Welcome Email": "transactional",
-  Promotional: "marketing",
-  "Flash Sale": "marketing",
-  "Cold Outreach": "outreach",
-  "Follow Up": "outreach",
-  "Order Confirmation": "transactional",
-  "Company Update": "newsletter",
-};
 
 export async function seedDefaultTemplates() {
   const { data: existing } = await supabase
@@ -33,7 +23,7 @@ export async function seedDefaultTemplates() {
     is_public: true,
     is_default: true,
     user_id: null,
-    category: TEMPLATE_CATEGORIES[t.name] ?? "general",
+    category: STARTER_TEMPLATE_CATEGORIES[t.name] ?? "general",
   }));
 
   const { error } = await supabase.from("templates").insert(templates);

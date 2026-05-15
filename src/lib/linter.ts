@@ -14,14 +14,11 @@ export function lintTemplate(template: Template): LintResult[] {
   const activeCanvas = getActiveCanvas(template);
   const { sections, globalStyles } = activeCanvas;
 
-  // Check global font family
-  if (
-    globalStyles.fontFamily.toLowerCase().includes("google") ||
-    globalStyles.fontFamily.toLowerCase().includes("http")
-  ) {
+  // Hosted webfonts often strip or fail in inbox clients
+  if (globalStyles.googleFontCssImportUrl) {
     results.push({
       severity: "warning",
-      message: "Web font URLs may not load in some clients",
+      message: "Web fonts may not load in some email clients",
       clients: ["Gmail", "Outlook"],
     });
   }

@@ -7,20 +7,970 @@ function makeTemplate(
   globalStyles: any,
 ): Template {
   const canvasId = uuid();
+  const pageId = uuid();
   return {
     id: uuid(),
     name,
-    canvases: [
+    pages: [
       {
-        id: canvasId,
-        name: "Canvas 1",
-        sections,
-        globalStyles,
+        id: pageId,
+        name: "Page 1",
+        canvases: [
+          {
+            id: canvasId,
+            name: "Variant 1",
+            x: 0,
+            y: 0,
+            sections,
+            globalStyles,
+          },
+        ],
+        activeCanvasId: canvasId,
       },
     ],
-    activeCanvasId: canvasId,
+    activePageId: pageId,
   };
 }
+
+const BRAND_NEWSLETTER_GLOBAL_STYLES = {
+  fontFamily: "Inter, sans-serif",
+  bgColor: "#1a2340",
+  contentWidth: 600,
+};
+
+function brandNewsletterLogoStrip(): any {
+  return {
+    id: uuid(),
+    columns: [
+      {
+        id: uuid(),
+        blocks: [
+          {
+            id: uuid(),
+            type: "logo-strip",
+            logos: [
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 1",
+              },
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 2",
+              },
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 3",
+              },
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 4",
+              },
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 5",
+              },
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 6",
+              },
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 7",
+              },
+              {
+                src: "https://placehold.co/80x40/ffffff/333333",
+                alt: "Partenaire 8",
+              },
+            ],
+            align: "center" as const,
+            logoHeight: 40,
+            gap: 16,
+            bgColor: "#ffffff",
+          },
+        ],
+      },
+    ],
+    bgColor: "#ffffff",
+    paddingTop: 24,
+    paddingBottom: 24,
+    paddingLeft: 24,
+    paddingRight: 24,
+  };
+}
+
+function makeBrandNewsletterTemplate(): Template {
+  const gs = BRAND_NEWSLETTER_GLOBAL_STYLES;
+  const c1 = uuid();
+  const c2 = uuid();
+  const c3 = uuid();
+  const c4 = uuid();
+
+  const canvas1Sections = [
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          blocks: [
+            {
+              id: uuid(),
+              type: "hero",
+              backgroundImage:
+                "https://placehold.co/600x300/1a2340/ffffff",
+              title: "NEWSLETTER",
+              subtitle: "N°01 — MARS 2026",
+              buttonLabel: "Parcourir",
+              buttonHref: "https://example.com",
+              buttonBgColor: "#ffffff",
+              buttonTextColor: "#1a2340",
+              overlayColor: "rgba(26,35,64,0.5)",
+              textColor: "#ffffff",
+              align: "center" as const,
+              minHeight: 300,
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
+    },
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          blocks: [
+            {
+              id: uuid(),
+              type: "nav-bar",
+              logoSrc: "https://placehold.co/120x40/ffffff/1a2340",
+              logoAlt: "Logo",
+              logoWidth: 120,
+              links: [
+                {
+                  label: "N°01 MARS 2026",
+                  href: "https://example.com",
+                },
+              ],
+              bgColor: "#1a2340",
+              linkColor: "#ffffff",
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
+    },
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          blocks: [
+            {
+              id: uuid(),
+              type: "text",
+              content: "RAMADAN, À VOTRE RYTHME",
+              fontSize: 32,
+              color: "#ffffff",
+              align: "center" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Menus légers, routines douces et instants à partager sans se presser.",
+              fontSize: 16,
+              color: "#cbd5e1",
+              align: "center" as const,
+              fontWeight: "normal" as const,
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 40,
+      paddingBottom: 40,
+      paddingLeft: 32,
+      paddingRight: 32,
+    },
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          width: 50,
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/120x40/ffffff/1a2340",
+              alt: "Logo",
+              width: 120,
+            },
+            { id: uuid(), type: "spacer", height: 16 },
+            {
+              id: uuid(),
+              type: "text",
+              content: "Nouveau partenaire",
+              fontSize: 22,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Nous accueillons Alya pour des recettes et rituels qui respectent votre énergie tout au long du mois.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Tables conviviales, épices douces et inspiration quotidienne — pensé pour les soirées qui s'étirent.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 16 },
+            {
+              id: uuid(),
+              type: "text",
+              content: "Une saison pour honorer chaque rythme, ensemble.",
+              fontSize: 16,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 20 },
+            {
+              id: uuid(),
+              type: "button",
+              label: "Découvrir avec Alya",
+              href: "https://example.com",
+              bgColor: "#2563eb",
+              textColor: "#ffffff",
+              borderRadius: 4,
+              align: "left" as const,
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          width: 50,
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "image-grid",
+              images: [
+                {
+                  src: "https://placehold.co/280x200/cccccc/666666",
+                  alt: "Galerie 1",
+                },
+                {
+                  src: "https://placehold.co/280x200/cccccc/666666",
+                  alt: "Galerie 2",
+                },
+                {
+                  src: "https://placehold.co/280x200/cccccc/666666",
+                  alt: "Galerie 3",
+                },
+                {
+                  src: "https://placehold.co/280x200/cccccc/666666",
+                  alt: "Galerie 4",
+                },
+              ],
+              columns: 2 as const,
+              gap: 10,
+              borderRadius: 6,
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 32,
+      paddingBottom: 32,
+      paddingLeft: 28,
+      paddingRight: 28,
+      columnGap: 20,
+    },
+    brandNewsletterLogoStrip(),
+  ];
+
+  const articlePageSectionsA = [
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          width: 50,
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/120x40/ffffff/1a2340",
+              alt: "Logo",
+              width: 120,
+            },
+            { id: uuid(), type: "spacer", height: 16 },
+            {
+              id: uuid(),
+              type: "text",
+              content: "L'esthétique du partage",
+              fontSize: 24,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Le geste simple d'inviter, de disposer la table et d'allumer une bougie transforme un dîner ordinaire en souvenir.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Nous aimons les contrastes : porcelaine fine, nappes texturées, casseroles qui racontent des voyages.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Cette page explore comment la mise en scène crée une chaleur durable, même quand le menu est minimaliste.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 16 },
+            {
+              id: uuid(),
+              type: "text",
+              content: "Une invitation à ralentir.",
+              fontSize: 16,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 20 },
+            {
+              id: uuid(),
+              type: "button",
+              label: "Lire l'article",
+              href: "https://example.com",
+              bgColor: "#2563eb",
+              textColor: "#ffffff",
+              borderRadius: 4,
+              align: "left" as const,
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          width: 50,
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/520x320/bbd4e8/1a2340",
+              alt: "Visuel principal",
+              width: 280,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "image-grid",
+              images: [
+                {
+                  src: "https://placehold.co/260x180/d4d4d8/52525b",
+                  alt: "Détail 1",
+                },
+                {
+                  src: "https://placehold.co/260x180/c7d2fe/312e81",
+                  alt: "Détail 2",
+                },
+              ],
+              columns: 2 as const,
+              gap: 8,
+              borderRadius: 6,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Les textures bois, lin et céramique matte ajoutent une profondeur silencieuse — suffisante pour ancrer la conversation.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/520x280/e2e8f0/1a2340",
+              alt: "Portrait ambiance",
+              width: 280,
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 32,
+      paddingBottom: 32,
+      paddingLeft: 28,
+      paddingRight: 28,
+      columnGap: 20,
+    },
+    brandNewsletterLogoStrip(),
+  ];
+
+  const articlePageSectionsB = [
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          width: 50,
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/120x40/ffffff/1a2340",
+              alt: "Logo",
+              width: 120,
+            },
+            { id: uuid(), type: "spacer", height: 16 },
+            {
+              id: uuid(),
+              type: "text",
+              content: "L'Alignement du Corps",
+              fontSize: 24,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Le corps révèle ce que le calendrier tait : besoin d'air, d'étirements et de pauses réelles, pas seulement planifiées.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Respiration basse, colonne allongée, regards détendus — de petits ajustements qui rendent la journée plus lisible.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Ici, on parle alignement comme une pratique, pas une performance : suffisamment pour tenir, jamais pour se punir.",
+              fontSize: 15,
+              color: "#e2e8f0",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 16 },
+            {
+              id: uuid(),
+              type: "text",
+              content: "Le mouvement comme langue intérieure.",
+              fontSize: 16,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 20 },
+            {
+              id: uuid(),
+              type: "button",
+              label: "Explorer la pratique",
+              href: "https://example.com",
+              bgColor: "#2563eb",
+              textColor: "#ffffff",
+              borderRadius: 4,
+              align: "left" as const,
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          width: 50,
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/520x320/fecdd3/9f1239",
+              alt: "Atelier mouvement",
+              width: 280,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "image-grid",
+              images: [
+                {
+                  src: "https://placehold.co/260x180/dcfce7/14532d",
+                  alt: "Étirement",
+                },
+                {
+                  src: "https://placehold.co/260x180/ede9fe/4c1d95",
+                  alt: "Posture",
+                },
+              ],
+              columns: 2 as const,
+              gap: 8,
+              borderRadius: 6,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "text",
+                content:
+                "Les séquences courtes — avant une réunion ou après une longue journée — aident à retrouver un centre sans bruit.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 14 },
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/520x280/fef3c7/92400e",
+              alt: "Studio",
+              width: 280,
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 32,
+      paddingBottom: 32,
+      paddingLeft: 28,
+      paddingRight: 28,
+      columnGap: 20,
+    },
+    brandNewsletterLogoStrip(),
+  ];
+
+  const canvas4Sections = [
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          blocks: [
+            {
+              id: uuid(),
+              type: "hero",
+              backgroundImage:
+                "https://placehold.co/600x320/312e81/e0e7ff",
+              title: "ALYA, À VOTRE RYTHME",
+              subtitle: "Inscriptions ouvertes — rejoignez le prochain volet.",
+              buttonLabel: "Réserver ma place",
+              buttonHref: "https://example.com",
+              buttonBgColor: "#ffffff",
+              buttonTextColor: "#1a2340",
+              overlayColor: "rgba(26,35,64,0.45)",
+              textColor: "#ffffff",
+              align: "center" as const,
+              minHeight: 320,
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
+    },
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "text",
+              content: "Le collectif",
+              fontSize: 18,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/320x200/e2e8f0/1a2340",
+              alt: "Collectif",
+              width: 180,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Rencontres en petit comité, témoignages et espace d'écoute pour avancer à votre cadence.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 10 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Chaque session laisse du temps aux questions et aux silences utiles.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 10 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Une communauté qui privilégie la profondeur plutôt que le bruit.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "text",
+              content: "Ateliers",
+              fontSize: 18,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/320x200/c7d2fe/312e81",
+              alt: "Atelier",
+              width: 180,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Formats hybrides : matinées courtes le week-end et soirées en ligne pour les agenda chargés.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 10 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Supports téléchargeables, playlists et fiches réflexes après chaque module.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 10 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Une pédagogie progressive qui respecte les débutantes comme les habituées.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          verticalAlign: "top" as const,
+          blocks: [
+            {
+              id: uuid(),
+              type: "text",
+              content: "Ressources",
+              fontSize: 18,
+              color: "#ffffff",
+              align: "left" as const,
+              fontWeight: "bold" as const,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "image",
+              src: "https://placehold.co/320x200/a7f3d0/065f46",
+              alt: "Ressources",
+              width: 180,
+            },
+            { id: uuid(), type: "spacer", height: 12 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Bibliothèque audio, carnets imprimables et rappels bienveillants chaque semaine.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 10 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Des contenus pensés pour s'intégrer dans une vraie vie, avec ses imprévus.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+            { id: uuid(), type: "spacer", height: 10 },
+            {
+              id: uuid(),
+              type: "text",
+              content:
+                "Accès conservé tant que votre inscription est active.",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "left" as const,
+              fontWeight: "normal" as const,
+            },
+          ],
+        },
+      ],
+      bgColor: "#1a2340",
+      paddingTop: 36,
+      paddingBottom: 36,
+      paddingLeft: 24,
+      paddingRight: 24,
+      columnGap: 16,
+    },
+    {
+      id: uuid(),
+      columns: [
+        {
+          id: uuid(),
+          blocks: [
+            {
+              id: uuid(),
+              type: "social",
+              links: [
+                {
+                  platform: "instagram" as const,
+                  url: "https://instagram.com",
+                },
+                {
+                  platform: "facebook" as const,
+                  url: "https://facebook.com",
+                },
+                {
+                  platform: "linkedin" as const,
+                  url: "https://linkedin.com",
+                },
+              ],
+              align: "left" as const,
+              iconSize: 22,
+              iconColor: "#e2e8f0",
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          blocks: [
+            {
+              id: uuid(),
+              type: "button",
+              label: "JE M'INSCRIS",
+              href: "https://example.com",
+              bgColor: "#2563eb",
+              textColor: "#ffffff",
+              borderRadius: 4,
+              align: "center" as const,
+            },
+          ],
+        },
+        {
+          id: uuid(),
+          blocks: [
+            {
+              id: uuid(),
+              type: "text",
+              content: "www.alya.fr",
+              fontSize: 14,
+              color: "#cbd5e1",
+              align: "right" as const,
+              fontWeight: "normal" as const,
+            },
+          ],
+        },
+      ],
+      bgColor: "#151d38",
+      paddingTop: 28,
+      paddingBottom: 28,
+      paddingLeft: 24,
+      paddingRight: 24,
+      columnGap: 12,
+    },
+    brandNewsletterLogoStrip(),
+  ];
+
+  const p1 = uuid();
+  const p2 = uuid();
+  const p3 = uuid();
+  const p4 = uuid();
+
+  return {
+    id: uuid(),
+    name: "Brand Newsletter",
+    pages: [
+      {
+        id: p1,
+        name: "Page 1",
+        canvases: [
+          {
+            id: c1,
+            name: "Variant 1",
+            x: 0,
+            y: 0,
+            sections: canvas1Sections,
+            globalStyles: gs,
+          },
+        ],
+        activeCanvasId: c1,
+      },
+      {
+        id: p2,
+        name: "Page 2",
+        canvases: [
+          {
+            id: c2,
+            name: "Variant 1",
+            x: 0,
+            y: 0,
+            sections: articlePageSectionsA,
+            globalStyles: gs,
+          },
+        ],
+        activeCanvasId: c2,
+      },
+      {
+        id: p3,
+        name: "Page 3",
+        canvases: [
+          {
+            id: c3,
+            name: "Variant 1",
+            x: 0,
+            y: 0,
+            sections: articlePageSectionsB,
+            globalStyles: gs,
+          },
+        ],
+        activeCanvasId: c3,
+      },
+      {
+        id: p4,
+        name: "Page 4",
+        canvases: [
+          {
+            id: c4,
+            name: "Variant 1",
+            x: 0,
+            y: 0,
+            sections: canvas4Sections,
+            globalStyles: gs,
+          },
+        ],
+        activeCanvasId: c4,
+      },
+    ],
+    activePageId: p1,
+  };
+}
+
+/** Used for Supabase `category` and for synthetic starter rows merged in the client. */
+export const STARTER_TEMPLATE_CATEGORIES: Record<string, string> = {
+  Minimal: "newsletter",
+  "Product Launch": "marketing",
+  "Weekly Digest": "newsletter",
+  "Welcome Email": "transactional",
+  Promotional: "marketing",
+  "Flash Sale": "marketing",
+  "Cold Outreach": "outreach",
+  "Follow Up": "outreach",
+  "Order Confirmation": "transactional",
+  "Company Update": "newsletter",
+  "Brand Newsletter": "newsletter",
+};
 
 export const STARTER_TEMPLATES: Template[] = [
   makeTemplate(
@@ -958,4 +1908,5 @@ export const STARTER_TEMPLATES: Template[] = [
     ],
     { fontFamily: "Inter, sans-serif", bgColor: "#f4f4f4", contentWidth: 600 },
   ),
+  makeBrandNewsletterTemplate(),
 ];

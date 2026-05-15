@@ -122,13 +122,16 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
               {name}
             </p>
           )}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-wrap">
             {project.is_public ? (
               <GlobeIcon className="w-3 h-3 text-muted-foreground" />
             ) : (
               <LockIcon className="w-3 h-3 text-muted-foreground" />
             )}
             <p className="text-[10px] text-muted-foreground">
+              {template.pages.length}{" "}
+              {template.pages.length === 1 ? "page" : "pages"}
+              <span className="text-muted-foreground/60"> · </span>
               {new Date(project.updated_at).toLocaleDateString()}
             </p>
           </div>
