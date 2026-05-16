@@ -19,7 +19,7 @@ export default function DndProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { addBlock, reorderBlocks, reorderSections } = useEditorStore();
+  const { addBlock, reorderBlocks, reorderSections, readOnly } = useEditorStore();
   const [activeBlock, setActiveBlock] = useState<Omit<Block, "id"> | null>(
     null,
   );
@@ -31,7 +31,10 @@ export default function DndProvider({
     }),
   );
 
+  const activeSensors = readOnly ? [] : sensors;
+
   const handleDragStart = (event: DragStartEvent) => {
+    if (readOnly) return;
     const data = event.active.data.current;
     if (data?.isPaletteItem) {
       setActiveBlock(data.blockDefault);
@@ -39,6 +42,7 @@ export default function DndProvider({
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (readOnly) return;
     const { active, over } = event;
     setActiveBlock(null);
 
@@ -87,7 +91,7 @@ export default function DndProvider({
 
   return (
     <DndContext
-      sensors={sensors}
+      sensors={activeSensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}

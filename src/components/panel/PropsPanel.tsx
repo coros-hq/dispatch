@@ -24,6 +24,7 @@ export default function PropsPanel() {
     updateBlock,
     updateGlobalStyles,
     updateSection,
+    readOnly,
   } = useEditorStore();
   const activeCanvas = getActiveCanvas(template);
 
@@ -35,7 +36,10 @@ export default function PropsPanel() {
 
   if (selection.type === "none") {
     return (
-      <div className="p-4 flex flex-col gap-4">
+      <fieldset
+        disabled={readOnly}
+        className="p-4 flex flex-col gap-4 border-0 m-0 min-w-0 disabled:opacity-50"
+      >
         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
           Global styles
         </p>
@@ -114,7 +118,7 @@ export default function PropsPanel() {
             </SelectContent>
           </Select>
         </Field>
-      </div>
+      </fieldset>
     );
   }
 

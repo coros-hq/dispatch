@@ -15,6 +15,7 @@ export type SavedTemplate = {
   is_public: boolean;
   is_default: boolean;
   user_id: string | null;
+  team_id: string | null;
   category: string;
   created_at: string;
   updated_at: string;
@@ -156,6 +157,7 @@ function starterFromCode(template: Template): SavedTemplate {
     is_public: true,
     is_default: true,
     user_id: null,
+    team_id: null,
     category: STARTER_TEMPLATE_CATEGORIES[template.name] ?? "general",
     created_at: new Date(0).toISOString(),
     updated_at: new Date(0).toISOString(),
@@ -234,6 +236,7 @@ export async function saveTemplate(
   template: Template,
   isPublic: boolean,
   category: string = "general",
+  teamId?: string | null,
 ): Promise<SavedTemplate> {
   const {
     data: { user },
@@ -248,6 +251,7 @@ export async function saveTemplate(
       is_public: isPublic,
       is_default: false,
       user_id: user.id,
+      team_id: teamId ?? null,
       category,
     })
     .select()

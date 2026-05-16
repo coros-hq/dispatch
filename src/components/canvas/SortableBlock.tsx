@@ -11,6 +11,7 @@ type Props = {
 }
 
 export default function SortableBlock({ block, sectionId, columnId }: Props) {
+  const readOnly = useEditorStore((s) => s.readOnly)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: block.id,
     data: {
@@ -19,6 +20,7 @@ export default function SortableBlock({ block, sectionId, columnId }: Props) {
       columnId,
       blockId: block.id,
     },
+    disabled: readOnly,
   })
   const { selection, select, removeBlock } = useEditorStore()
   const isSelected =
@@ -57,7 +59,7 @@ export default function SortableBlock({ block, sectionId, columnId }: Props) {
       </div>
 
       {/* Delete button */}
-      {isSelected && (
+      {isSelected && !readOnly && (
         <button
           onClick={(e) => { e.stopPropagation(); removeBlock(sectionId, columnId, block.id) }}
           className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer"

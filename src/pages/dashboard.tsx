@@ -1,12 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { PlusIcon, LogOutIcon, UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { fetchTemplates, deleteTemplate } from "@/lib/template-service";
+import {
+  fetchTemplates,
+  deleteTemplate,
+  migrateTemplate,
+} from "@/lib/template-service";
 import type { SavedTemplate } from "@/lib/template-service";
 import { useAuthStore } from "@/store/auth";
 import { useEditorStore } from "@/store/editor";
+import { canEditTeam, useTeamStore } from "@/store/team";
 import { signOut } from "@/lib/auth";
 import { toast } from "sonner";
 import Logo from "@/assets/logo.svg";
@@ -21,26 +26,114 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { WorkspaceSwitcher } from "@/components/team/WorkspaceSwitcher";
+import {
+  fetchTeamMembers,
+  fetchTeamTemplates,
+  fetchUserTeams,
+  getMyTeamRole,
+} from "@/lib/teamService";
+import { useSyncTeamRole } from "@/hooks/useSyncTeamRole";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { setTemplate, setCurrentProjectId } = useEditorStore();
+  const {
+    activeTeamId,
+    activeRole,
+    teams,
+    setTeams,
+    setActiveRole,
+  } = useTeamStore();
+  useSyncTeamRole();
   const [projects, setProjects] = useState<SavedTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"updated" | "created" | "name">("updated");
+  const [memberCount, setMemberCount] = useState<number | undefined>();
+
+  const activeTeam = teams.find((t) => t.id === activeTeamId);
+  const canEdit = !activeTeamId || canEditTeam(activeRole);
+
+  const sortedProjects = useMemo(() => {
+    const list = [...projects];
+    if (sort === "name") {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === "created") {
+      list.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+    } else {
+      list.sort(
+        (a, b) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+      );
+    }
+    return list;
+  }, [projects, sort]);
+
+  const loadTeams = useCallback(async () => {
+    try {
+      const userTeams = await fetchUserTeams();
+      setTeams(userTeams);
+      if (activeTeamId && !userTeams.some((t) => t.id === activeTeamId)) {
+        useTeamStore.getState().setActiveTeamId(null);
+        useTeamStore.getState().setActiveRole(null);
+      } else if (activeTeamId) {
+        const role = await getMyTeamRole(activeTeamId);
+        setActiveRole(role);
+        const members = await fetchTeamMembers(activeTeamId);
+        setMemberCount(members.length);
+      } else {
+        setMemberCount(undefined);
+      }
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to load teams");
+    }
+  }, [activeTeamId, setTeams, setActiveRole]);
 
   const loadProjects = useCallback(
-    async (searchTerm: string) => {
+    async (searchTerm: string, workspaceTeamId?: string | null) => {
+      const teamId =
+        workspaceTeamId !== undefined
+          ? workspaceTeamId
+          : useTeamStore.getState().activeTeamId;
+
       setLoading(true);
+      setProjects([]);
+
       try {
-        const templates = await fetchTemplates(searchTerm);
-        setProjects(
-          templates.filter((t) => !t.is_default && t.user_id === user?.id),
+        let templates: SavedTemplate[];
+        if (teamId) {
+          const raw = await fetchTeamTemplates(teamId);
+          templates = (raw as SavedTemplate[]).map((t) => ({
+            ...t,
+            data: migrateTemplate(t.data),
+          }));
+        } else {
+          const all = await fetchTemplates(searchTerm);
+          templates = all.filter(
+            (t) =>
+              !t.is_default &&
+              t.user_id === user?.id &&
+              !t.team_id,
+          );
+        }
+
+        const searchTrim = searchTerm.trim().toLowerCase();
+        if (searchTrim) {
+          templates = templates.filter((t) =>
+            t.name.toLowerCase().includes(searchTrim),
+          );
+        }
+        setProjects(templates);
+      } catch (err: unknown) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to load projects",
         );
-      } catch (err: any) {
-        toast.error(err.message);
+        setProjects([]);
       } finally {
         setLoading(false);
       }
@@ -49,8 +142,12 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
-    loadProjects("");
-  }, [loadProjects]);
+    loadTeams();
+  }, [loadTeams]);
+
+  useEffect(() => {
+    loadProjects("", activeTeamId);
+  }, [loadProjects, activeTeamId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -60,6 +157,10 @@ export default function Dashboard() {
   }, [search, loadProjects]);
 
   const handleNew = () => {
+    if (!canEdit) {
+      toast.error("You don't have permission to create projects in this team");
+      return;
+    }
     const pageId = crypto.randomUUID();
     const canvasId = crypto.randomUUID();
     const inter = GOOGLE_FONT_PRESETS.find((p) => p.id === "inter")!;
@@ -93,18 +194,24 @@ export default function Dashboard() {
     setCurrentProjectId(null);
     navigate("/editor");
   };
+
   const handleOpen = (project: SavedTemplate) => {
     setTemplate(project.data as Template);
     setCurrentProjectId(project.id);
     navigate(`/editor/${project.id}`);
   };
+
   const handleDelete = async (id: string) => {
+    if (!canEdit) {
+      toast.error("You don't have permission to delete projects");
+      return;
+    }
     try {
       await deleteTemplate(id);
       setProjects((prev) => prev.filter((p) => p.id !== id));
       toast.success("Project deleted");
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
     }
   };
 
@@ -113,15 +220,30 @@ export default function Dashboard() {
     navigate("/sign-in");
   };
 
+  const workspaceTitle = activeTeam ? activeTeam.name : "My projects";
+  const workspaceSubtitle = activeTeam
+    ? `Team workspace · ${projects.length} project${projects.length !== 1 ? "s" : ""}`
+    : `${projects.length} project${projects.length !== 1 ? "s" : ""}`;
+
   return (
     <div className="min-h-screen bg-muted">
-      {/* Header */}
       <header className="h-14 border-b border-white/20 flex items-center justify-between px-6">
         <div className="flex items-center gap-2.5">
           <img src={Logo} alt="Dispatch" className="w-7 h-7" />
           <span className="text-base font-semibold text-foreground">
             Dispatch
           </span>
+          <Separator
+            className="text-white bg-white/20"
+            orientation="vertical"
+          />
+          <WorkspaceSwitcher
+            memberCount={memberCount}
+            onWorkspaceChange={(teamId) => {
+              loadTeams();
+              loadProjects(search, teamId);
+            }}
+          />
           <Separator
             className="text-white bg-white/20"
             orientation="vertical"
@@ -157,11 +279,16 @@ export default function Dashboard() {
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">
-              My projects
+              {workspaceTitle}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {projects.length} project{projects.length !== 1 ? "s" : ""}
+              {workspaceSubtitle}
             </p>
+            {!canEdit && activeTeam && (
+              <p className="text-xs text-amber-500/90 mt-1">
+                View-only access — you can preview projects but not edit or save
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-3 mb-6">
             <Input
@@ -192,14 +319,15 @@ export default function Dashboard() {
             >
               Templates
             </Button>
-            <Button onClick={handleNew}>
-              <PlusIcon className="w-4 h-4 mr-2" />
-              New project
-            </Button>
+            {canEdit && (
+              <Button onClick={handleNew}>
+                <PlusIcon className="w-4 h-4 mr-2" />
+                New project
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Projects grid */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
@@ -209,7 +337,7 @@ export default function Dashboard() {
               />
             ))}
           </div>
-        ) : projects.length === 0 ? (
+        ) : sortedProjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
               <img src={Logo} alt="Dispatch" className="w-7 h-7 opacity-40" />
@@ -219,22 +347,29 @@ export default function Dashboard() {
                 No projects yet
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Create your first newsletter to get started
+                {canEdit
+                  ? "Create your first newsletter to get started"
+                  : "No team projects to show"}
               </p>
             </div>
-            <Button onClick={handleNew}>
-              <PlusIcon className="w-4 h-4 mr-2" />
-              New project
-            </Button>
+            {canEdit && (
+              <Button onClick={handleNew}>
+                <PlusIcon className="w-4 h-4 mr-2" />
+                New project
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {projects.map((project) => (
+            {sortedProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 project={project}
                 onClick={() => handleOpen(project)}
-                onDelete={() => handleDelete(project.id)}
+                onDelete={
+                  canEdit ? () => handleDelete(project.id) : undefined
+                }
+                canRename={canEdit}
               />
             ))}
           </div>

@@ -7,6 +7,7 @@ import ColumnArea from "./ColumnArea";
 type Props = { section: Section };
 
 export default function SectionRow({ section }: Props) {
+  const readOnly = useEditorStore((s) => s.readOnly);
   const {
     attributes,
     listeners,
@@ -17,6 +18,7 @@ export default function SectionRow({ section }: Props) {
   } = useSortable({
     id: section.id,
     data: { isSection: true },
+    disabled: readOnly,
   });
   const { selection, select, removeSection } = useEditorStore();
   const isSelected =
@@ -65,7 +67,7 @@ export default function SectionRow({ section }: Props) {
       </div>
 
       {/* Delete button */}
-      {isSelected && (
+      {isSelected && !readOnly && (
         <button
           onClick={(e) => {
             e.stopPropagation();

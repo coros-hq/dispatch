@@ -4,6 +4,7 @@ import { PlusIcon, XIcon } from "lucide-react";
 import { ConfirmationDialog } from "../ConfirmationDialog";
 
 export default function PageTabs() {
+  const readOnly = useEditorStore((s) => s.readOnly);
   const {
     template,
     setActivePage,
@@ -19,6 +20,7 @@ export default function PageTabs() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDoubleClick = (id: string, name: string) => {
+    if (readOnly) return;
     setRenamingId(id);
     setRenameValue(name);
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -67,7 +69,7 @@ export default function PageTabs() {
             <span>{page.name}</span>
           )}
 
-          {pages.length > 1 && (
+          {pages.length > 1 && !readOnly && (
             <ConfirmationDialog
               isOpen={deleteDialogId === page.id}
               onClose={() => setDeleteDialogId(null)}
@@ -94,13 +96,15 @@ export default function PageTabs() {
         </div>
       ))}
 
-      <button
-        onClick={addPage}
-        className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground transition-colors shrink-0 cursor-pointer border border-dashed border-border/80"
-        title="Add page"
-      >
-        <PlusIcon className="w-3.5 h-3.5" />
-      </button>
+      {!readOnly && (
+        <button
+          onClick={addPage}
+          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground transition-colors shrink-0 cursor-pointer border border-dashed border-border/80"
+          title="Add page"
+        >
+          <PlusIcon className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }
