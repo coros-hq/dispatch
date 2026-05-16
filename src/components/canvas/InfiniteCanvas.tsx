@@ -12,7 +12,7 @@ const MAX_ZOOM = 2;
 const ZOOM_STEP = 0.1;
 
 export default function InfiniteCanvas() {
-  const { template, select, addCanvas, mode, previewTemplate, previewWidth } =
+  const { template, select, addCanvas, mode, previewTemplate, previewWidth, readOnly } =
     useEditorStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const [pan, setPan] = useState({ x: 80, y: 80 });
@@ -182,14 +182,16 @@ export default function InfiniteCanvas() {
           <Maximize2Icon className="w-3.5 h-3.5" />
         </button>
         <div className="w-px h-4 bg-border mx-1" />
-        <button
-          onClick={addCanvas}
-          className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1 text-xs"
-          data-tour="add-canvas"
-        >
-          <PlusIcon className="w-3.5 h-3.5" />
-          Add variant
-        </button>
+        {!readOnly && (
+          <button
+            onClick={addCanvas}
+            className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1 text-xs"
+            data-tour="add-canvas"
+          >
+            <PlusIcon className="w-3.5 h-3.5" />
+            Add variant
+          </button>
+        )}
       </div>
 
       {/* Zoom hint */}

@@ -9,10 +9,16 @@ import { getActiveCanvas } from "@/store/editor";
 type ProjectCardProps = {
   project: SavedTemplate;
   onClick: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
+  canRename?: boolean;
 };
 
-export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  onClick,
+  onDelete,
+  canRename = true,
+}: ProjectCardProps) {
   const template = migrateTemplate(project.data);
   const activeCanvas = getActiveCanvas(template);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -22,6 +28,7 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
 
   const handleRenameClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!canRename) return;
     setIsRenaming(true);
     setTimeout(() => inputRef.current?.focus(), 0);
   };
@@ -136,25 +143,27 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
             </p>
           </div>
         </div>
-        <ConfirmationDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          title="Delete Project"
-          description="Are you sure you want to delete this project? This action cannot be undone."
-          trigger={
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsDialogOpen(true);
-              }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive cursor-pointer ml-2 shrink-0"
-            >
-              <Trash2Icon className="w-3.5 h-3.5" />
-            </button>
-          }
-          actionText="Delete"
-          onAction={() => onDelete()}
-        />
+        {onDelete && (
+          <ConfirmationDialog
+            isOpen={isDialogOpen}
+            onClose={() => setIsDialogOpen(false)}
+            title="Delete Project"
+            description="Are you sure you want to delete this project? This action cannot be undone."
+            trigger={
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDialogOpen(true);
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive cursor-pointer ml-2 shrink-0"
+              >
+                <Trash2Icon className="w-3.5 h-3.5" />
+              </button>
+            }
+            actionText="Delete"
+            onAction={() => onDelete()}
+          />
+        )}
       </div>
     </div>
   );

@@ -17,13 +17,28 @@ import InfiniteCanvas from "./components/canvas/InfiniteCanvas";
 import CanvasTabs from "./components/canvas/CanvasTabs";
 import PageTabs from "./components/canvas/PageTabs";
 import Tour from "./components/onboarding/Tour";
+import { useEffect } from "react";
+import { useSyncTeamRole } from "@/hooks/useSyncTeamRole";
+import { canEditTeam, useTeamStore } from "@/store/team";
+import { ViewOnlyBanner } from "@/components/team/ViewOnlyBanner";
 
 export default function App() {
   const mode = useEditorStore((s) => s.mode);
+  const readOnly = useEditorStore((s) => s.readOnly);
+  const setReadOnly = useEditorStore((s) => s.setReadOnly);
+  const activeTeamId = useTeamStore((s) => s.activeTeamId);
+  const activeRole = useSyncTeamRole();
+
+  useEffect(() => {
+    const viewOnly = Boolean(activeTeamId && !canEditTeam(activeRole));
+    setReadOnly(viewOnly);
+    return () => setReadOnly(false);
+  }, [activeTeamId, activeRole, setReadOnly]);
 
   return (
     <DndProvider>
       <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+        {readOnly && <ViewOnlyBanner />}
         <Toolbar />
         <Separator />
         <ResizablePanelGroup
@@ -78,7 +93,7 @@ export default function App() {
                   </TabsList>
                   <TabsContent
                     value="props"
-                    className="flex-1 overflow-y-auto m-0"
+                    className={`flex-1 overflow-y-auto m-0 ${readOnly ? "pointer-events-none opacity-60" : ""}`}
                   >
                     <PropsPanel />
                   </TabsContent>

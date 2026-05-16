@@ -5,6 +5,7 @@ import { ConfirmationDialog } from "../ConfirmationDialog";
 
 export default function CanvasTabs() {
   const template = useEditorStore((s) => s.template);
+  const readOnly = useEditorStore((s) => s.readOnly);
   const {
     setActiveCanvas,
     addCanvas,
@@ -19,6 +20,7 @@ export default function CanvasTabs() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDoubleClick = (id: string, name: string) => {
+    if (readOnly) return;
     setRenamingId(id);
     setRenameValue(name);
     setTimeout(() => inputRef.current?.focus(), 0);
@@ -67,7 +69,7 @@ export default function CanvasTabs() {
             <span>{canvas.name}</span>
           )}
 
-          {canvases.length > 1 && (
+          {canvases.length > 1 && !readOnly && (
             <ConfirmationDialog
               isOpen={deleteDialogId === canvas.id}
               onClose={() => setDeleteDialogId(null)}
@@ -94,12 +96,14 @@ export default function CanvasTabs() {
         </div>
       ))}
 
-      <button
-        onClick={addCanvas}
-        className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shrink-0 cursor-pointer"
-      >
-        <PlusIcon className="w-3.5 h-3.5" />
-      </button>
+      {!readOnly && (
+        <button
+          onClick={addCanvas}
+          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shrink-0 cursor-pointer"
+        >
+          <PlusIcon className="w-3.5 h-3.5" />
+        </button>
+      )}
     </div>
   );
 }

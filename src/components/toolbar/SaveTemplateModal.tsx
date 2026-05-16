@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useEditorStore } from "../../store/editor";
 import { saveTemplate, updateTemplate } from "@/lib/template-service";
+import { useTeamStore } from "@/store/team";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 const CATEGORIES = [
   { value: "general", label: "General" },
   { value: "newsletter", label: "Newsletter" },
@@ -33,31 +33,51 @@ const CATEGORIES = [
 export default function SaveTemplateModal() {
   const { template, currentProjectId, setCurrentProjectId } = useEditorStore();
   const renameTemplate = useEditorStore((s) => s.renameTemplate);
+  const { activeTeamId, teams } = useTeamStore();
+  const readOnly = useEditorStore((s) => s.readOnly);
   const [isPublic, setIsPublic] = useState(false);
   const [category, setCategory] = useState("general");
+  const [saveTo, setSaveTo] = useState<string>("personal");
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
 
   const isExisting = !!currentProjectId;
+  const canEdit = !readOnly;
+
+  useEffect(() => {
+    if (open) {
+      setSaveTo(activeTeamId ?? "personal");
+    }
+  }, [open, activeTeamId]);
 
   const handleSave = async () => {
+    if (!canEdit && saveTo !== "personal") {
+      toast.error("You don't have permission to save to this team");
+      return;
+    }
+    const teamId = saveTo === "personal" ? null : saveTo;
+
     setSaving(true);
     try {
       if (isExisting) {
         await updateTemplate(currentProjectId, template, isPublic, category);
         toast.success("Project updated");
       } else {
-        const saved = await saveTemplate(template, isPublic, category);
+        const saved = await saveTemplate(template, isPublic, category, teamId);
         setCurrentProjectId(saved.id);
         toast.success("Project saved");
       }
       setOpen(false);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
     }
   };
+
+  if (readOnly) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -86,6 +106,23 @@ export default function SaveTemplateModal() {
               onChange={(e) => renameTemplate(e.target.value)}
               placeholder="My newsletter template"
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label>Save to</Label>
+            <Select value={saveTo} onValueChange={setSaveTo}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="text-white">
+                <SelectItem className="text-white" value="personal">Personal</SelectItem>
+                {teams.map((team) => (
+                  <SelectItem className="text-white" key={team.id} value={team.id}>
+                    {team.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex flex-col gap-1.5">

@@ -16,6 +16,8 @@ import Dashboard from "./pages/dashboard.tsx";
 import ProfilePage from "./pages/profile.tsx";
 import NotFound from "./pages/not-found.tsx";
 import TemplatesPage from "./pages/templates.tsx";
+import TeamSettings from "./pages/TeamSettings.tsx";
+import AcceptInvite from "./pages/AcceptInvite.tsx";
 import { Index } from "./pages/landing.tsx";
 
 const root = document.getElementById("root")!;
@@ -33,6 +35,8 @@ createRoot(root).render(
         <Route path="/" element={<Index />} />
 
         {/* Auth routes */}
+        <Route path="/invite/:token" element={<AcceptInvite />} />
+
         <Route element={<AuthLayout />}>
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
@@ -45,6 +49,7 @@ createRoot(root).render(
         <Route element={<ProtectedRoute />}>
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/teams/:slug/settings" element={<TeamSettings />} />
           <Route path="/editor" element={<App />} />
           <Route path="/editor/:id" element={<App />} />
           <Route path="/profile" element={<ProfilePage />} />

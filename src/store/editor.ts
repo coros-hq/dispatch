@@ -27,6 +27,7 @@ type EditorStore = {
   previewTemplate: Template | null;
   previewWidth: "desktop" | "mobile";
   currentProjectId: string | null;
+  readOnly: boolean;
   canvasCounter: number;
   pageCounter: number;
 
@@ -51,6 +52,7 @@ type EditorStore = {
   setPreviewTemplate: (template: Template | null) => void;
   setPreviewWidth: (width: "desktop" | "mobile") => void;
   setCurrentProjectId: (id: string | null) => void;
+  setReadOnly: (readOnly: boolean) => void;
 
   // Section actions
   addSection: (columnCount: 1 | 2 | 3) => void;
@@ -206,8 +208,11 @@ export const useEditorStore = create<EditorStore>()(
         previewTemplate: null,
         previewWidth: "desktop",
         currentProjectId: null,
+        readOnly: false,
         canvasCounter: 1,
         pageCounter: 1,
+
+        setReadOnly: (readOnly) => set({ readOnly }),
 
         addPage: () =>
           set((state) => {

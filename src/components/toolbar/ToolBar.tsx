@@ -51,6 +51,8 @@ export default function Toolbar() {
     currentProjectId,
   } = useEditorStore();
   const navigate = useNavigate();
+  const readOnly = useEditorStore((s) => s.readOnly);
+  const canEdit = !readOnly;
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | null>(null);
 
   const copy = (
@@ -78,7 +80,7 @@ export default function Toolbar() {
   };
 
   useEffect(() => {
-    if (!currentProjectId) return;
+    if (!currentProjectId || !canEdit) return;
     const interval = setInterval(async () => {
       setSaveStatus("saving");
       try {
@@ -90,7 +92,7 @@ export default function Toolbar() {
       }
     }, 30000);
     return () => clearInterval(interval);
-  }, [currentProjectId, template]);
+  }, [currentProjectId, template, canEdit]);
 
   const allLayoutCount = template.pages.reduce(
     (n, p) => n + p.canvases.length,
@@ -114,7 +116,7 @@ export default function Toolbar() {
           variant="ghost"
           size="icon"
           onClick={() => undo()}
-          disabled={pastStates.length === 0}
+          disabled={!canEdit || pastStates.length === 0}
           className="text-muted-foreground hover:text-foreground"
         >
           <Undo2Icon className="w-4 h-4" />
@@ -123,7 +125,7 @@ export default function Toolbar() {
           variant="ghost"
           size="icon"
           onClick={() => redo()}
-          disabled={futureStates.length === 0}
+          disabled={!canEdit || futureStates.length === 0}
           className="text-muted-foreground hover:text-foreground"
         >
           <Redo2Icon className="w-4 h-4" />
@@ -134,7 +136,8 @@ export default function Toolbar() {
           <input
             value={template.name}
             onChange={(e) => renameTemplate(e.target.value)}
-            className="text-sm text-foreground bg-transparent border-b border-transparent focus:border-border outline-none transition-colors w-32"
+            readOnly={!canEdit}
+            className="text-sm text-foreground bg-transparent border-b border-transparent focus:border-border outline-none transition-colors w-32 disabled:opacity-70"
           />
         </div>
         {saveStatus === "saving" && (
@@ -229,9 +232,11 @@ export default function Toolbar() {
         </DropdownMenu>
 
         <SendTestModal />
-        <span data-tour="toolbar-save">
-          <SaveTemplateModal />
-        </span>
+        {canEdit && (
+          <span data-tour="toolbar-save">
+            <SaveTemplateModal />
+          </span>
+        )}
       </div>
     </header>
   );
