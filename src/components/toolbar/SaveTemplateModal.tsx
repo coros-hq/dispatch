@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useEditorStore } from "../../store/editor";
 import { saveTemplate, updateTemplate } from "@/lib/template-service";
+import { saveVersion } from "@/lib/versionService";
 import { useTeamStore } from "@/store/team";
+import { PLAN_LIMITS } from "@/lib/planLimits";
+import { usePlanStore } from "@/store/plan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,8 +38,11 @@ export default function SaveTemplateModal() {
   const { template, currentProjectId, setCurrentProjectId } = useEditorStore();
   const renameTemplate = useEditorStore((s) => s.renameTemplate);
   const { activeTeamId, teams } = useTeamStore();
+  const { plan } = usePlanStore();
+  const limits = PLAN_LIMITS[plan];
   const readOnly = useEditorStore((s) => s.readOnly);
   const [isPublic, setIsPublic] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [category, setCategory] = useState("general");
   const [saveTo, setSaveTo] = useState<string>("personal");
   const [saving, setSaving] = useState(false);
@@ -55,16 +62,26 @@ export default function SaveTemplateModal() {
       toast.error("You don't have permission to save to this team");
       return;
     }
+    if (isPublic && !limits.canSavePublicTemplates) {
+      setUpgradeOpen(true);
+      return;
+    }
     const teamId = saveTo === "personal" ? null : saveTo;
+    if (teamId && !limits.canUseTeams) {
+      setUpgradeOpen(true);
+      return;
+    }
 
     setSaving(true);
     try {
       if (isExisting) {
         await updateTemplate(currentProjectId, template, isPublic, category);
+        await saveVersion(currentProjectId, template);
         toast.success("Project updated");
       } else {
         const saved = await saveTemplate(template, isPublic, category, teamId);
         setCurrentProjectId(saved.id);
+        await saveVersion(saved.id, template);
         toast.success("Project saved");
       }
       setOpen(false);
@@ -79,7 +96,21 @@ export default function SaveTemplateModal() {
     return null;
   }
 
+  const handlePublicToggle = (checked: boolean) => {
+    if (checked && !limits.canSavePublicTemplates) {
+      setUpgradeOpen(true);
+      return;
+    }
+    setIsPublic(checked);
+  };
+
   return (
+    <>
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        feature="Public templates"
+      />
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
@@ -116,11 +147,16 @@ export default function SaveTemplateModal() {
               </SelectTrigger>
               <SelectContent className="text-white">
                 <SelectItem className="text-white" value="personal">Personal</SelectItem>
-                {teams.map((team) => (
-                  <SelectItem className="text-white" key={team.id} value={team.id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
+                {limits.canUseTeams &&
+                  teams.map((team) => (
+                    <SelectItem
+                      className="text-white"
+                      key={team.id}
+                      value={team.id}
+                    >
+                      {team.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -149,7 +185,7 @@ export default function SaveTemplateModal() {
                 library
               </p>
             </div>
-            <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+            <Switch checked={isPublic} onCheckedChange={handlePublicToggle} />
           </div>
         </div>
 
@@ -163,5 +199,6 @@ export default function SaveTemplateModal() {
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

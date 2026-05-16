@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import { useEditorStore } from "../../store/editor";
 import { PlusIcon, XIcon } from "lucide-react";
 import { ConfirmationDialog } from "../ConfirmationDialog";
+import { PLAN_LIMITS } from "@/lib/planLimits";
+import { usePlanStore } from "@/store/plan";
+import { UpgradePrompt } from "@/components/ui/UpgradePrompt";
 
 export default function PageTabs() {
   const readOnly = useEditorStore((s) => s.readOnly);
@@ -14,6 +17,8 @@ export default function PageTabs() {
   } = useEditorStore();
 
   const { pages, activePageId } = template;
+  const { plan } = usePlanStore();
+  const atPageLimit = pages.length >= PLAN_LIMITS[plan].maxPagesPerProject;
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null);
@@ -96,15 +101,22 @@ export default function PageTabs() {
         </div>
       ))}
 
-      {!readOnly && (
-        <button
-          onClick={addPage}
-          className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground transition-colors shrink-0 cursor-pointer border border-dashed border-border/80"
-          title="Add page"
-        >
-          <PlusIcon className="w-3.5 h-3.5" />
-        </button>
-      )}
+      {!readOnly &&
+        (atPageLimit ? (
+          <UpgradePrompt
+            feature="More pages"
+            description="Free plan includes 2 pages per project."
+            compact
+          />
+        ) : (
+          <button
+            onClick={addPage}
+            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground transition-colors shrink-0 cursor-pointer border border-dashed border-border/80"
+            title="Add page"
+          >
+            <PlusIcon className="w-3.5 h-3.5" />
+          </button>
+        ))}
     </div>
   );
 }

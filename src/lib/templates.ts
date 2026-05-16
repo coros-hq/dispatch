@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import type { Template } from "../types";
+import type { Section, Template } from "../types";
 
 function makeTemplate(
   name: string,
@@ -38,7 +38,7 @@ const BRAND_NEWSLETTER_GLOBAL_STYLES = {
   contentWidth: 600,
 };
 
-function brandNewsletterLogoStrip(): any {
+function brandNewsletterLogoStrip(): Section {
   return {
     id: uuid(),
     columns: [
@@ -47,7 +47,7 @@ function brandNewsletterLogoStrip(): any {
         blocks: [
           {
             id: uuid(),
-            type: "logo-strip",
+            type: "logo-strip" as const,
             logos: [
               {
                 src: "https://placehold.co/80x40/ffffff/333333",
@@ -95,7 +95,7 @@ function brandNewsletterLogoStrip(): any {
     paddingBottom: 24,
     paddingLeft: 24,
     paddingRight: 24,
-  };
+  } as Section;
 }
 
 function makeBrandNewsletterTemplate(): Template {
@@ -313,7 +313,7 @@ function makeBrandNewsletterTemplate(): Template {
       columnGap: 20,
     },
     brandNewsletterLogoStrip(),
-  ];
+  ] as Section[];
 
   const articlePageSectionsA = [
     {
@@ -457,7 +457,7 @@ function makeBrandNewsletterTemplate(): Template {
       columnGap: 20,
     },
     brandNewsletterLogoStrip(),
-  ];
+  ] as Section[];
 
   const articlePageSectionsB = [
     {
@@ -601,7 +601,7 @@ function makeBrandNewsletterTemplate(): Template {
       columnGap: 20,
     },
     brandNewsletterLogoStrip(),
-  ];
+  ] as Section[];
 
   const canvas4Sections = [
     {
@@ -881,12 +881,10 @@ function makeBrandNewsletterTemplate(): Template {
       columnGap: 12,
     },
     brandNewsletterLogoStrip(),
-  ];
+  ] as Section[];
 
   const p1 = uuid();
-  const p2 = uuid();
-  const p3 = uuid();
-  const p4 = uuid();
+
 
   return {
     id: uuid(),
@@ -898,59 +896,38 @@ function makeBrandNewsletterTemplate(): Template {
         canvases: [
           {
             id: c1,
-            name: "Variant 1",
+            name: "Cover",
             x: 0,
             y: 0,
             sections: canvas1Sections,
             globalStyles: gs,
           },
-        ],
-        activeCanvasId: c1,
-      },
-      {
-        id: p2,
-        name: "Page 2",
-        canvases: [
           {
             id: c2,
-            name: "Variant 1",
-            x: 0,
+            name: "Article 1",
+            x: 680,
             y: 0,
             sections: articlePageSectionsA,
             globalStyles: gs,
           },
-        ],
-        activeCanvasId: c2,
-      },
-      {
-        id: p3,
-        name: "Page 3",
-        canvases: [
           {
             id: c3,
-            name: "Variant 1",
-            x: 0,
+            name: "Article 2",
+            x: 1360,
             y: 0,
             sections: articlePageSectionsB,
             globalStyles: gs,
           },
-        ],
-        activeCanvasId: c3,
-      },
-      {
-        id: p4,
-        name: "Page 4",
-        canvases: [
           {
             id: c4,
-            name: "Variant 1",
-            x: 0,
+            name: "CTA",
+            x: 2040,
             y: 0,
             sections: canvas4Sections,
             globalStyles: gs,
           },
         ],
-        activeCanvasId: c4,
+        activeCanvasId: c1,
       },
     ],
     activePageId: p1,

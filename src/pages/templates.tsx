@@ -11,6 +11,9 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import Logo from "@/assets/logo.svg";
 import { TemplateCard } from "@/components/TemplateCard";
+import { PLAN_LIMITS } from "@/lib/planLimits";
+import { usePlanStore } from "@/store/plan";
+import { UpgradePrompt } from "@/components/ui/UpgradePrompt";
 
 const CATEGORIES = [
   { value: "all", label: "All" },
@@ -24,6 +27,8 @@ const CATEGORIES = [
 export default function TemplatesPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { plan } = usePlanStore();
+  const canAccessCommunity = PLAN_LIMITS[plan].canAccessCommunityTemplates;
   const { setTemplate, setCurrentProjectId } = useEditorStore();
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,19 +171,26 @@ export default function TemplatesPage() {
                 <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-widest mb-4">
                   Community templates
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {communityTemplates.map((t) => (
-                    <TemplateCard
-                      key={t.id}
-                      template={t}
-                      isPreview={preview?.id === t.id}
-                      onPreview={() =>
-                        setPreview(preview?.id === t.id ? null : t)
-                      }
-                      onUse={() => handleUse(t)}
-                    />
-                  ))}
-                </div>
+                {canAccessCommunity ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {communityTemplates.map((t) => (
+                      <TemplateCard
+                        key={t.id}
+                        template={t}
+                        isPreview={preview?.id === t.id}
+                        onPreview={() =>
+                          setPreview(preview?.id === t.id ? null : t)
+                        }
+                        onUse={() => handleUse(t)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <UpgradePrompt
+                    feature="Community templates"
+                    description="Browse and use templates shared by the Dispatch community."
+                  />
+                )}
               </div>
             )}
 

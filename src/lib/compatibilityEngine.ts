@@ -134,7 +134,9 @@ const RULES: {
     property: 'Font size below 11px',
     description: 'iOS auto-resizes fonts smaller than 11px — use 11px minimum',
     detect: (html) => {
-      const matches = [...html.matchAll(/font-size\s*:\s*(\d+)px/gi)]
+      const matches = Array.from(
+        html.matchAll(/font-size\s*:\s*(\d+)px/gi),
+      )
       return matches.some((m) => parseInt(m[1]) < 11)
     },
     support: {

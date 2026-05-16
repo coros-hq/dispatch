@@ -1,4 +1,5 @@
 import { PASSWORD_RECOVERY_PENDING_KEY, useAuthStore } from "@/store/auth";
+import { usePlanStore } from "@/store/plan";
 import { supabase } from "./supabase";
 
 export async function signIn(email: string, password: string) {
@@ -43,6 +44,7 @@ export async function resetPassword(password: string) {
 
 export async function signOut() {
   useAuthStore.getState().setUser(null);
+  usePlanStore.getState().reset();
   localStorage.removeItem("dispatch-auth");
   sessionStorage.removeItem(PASSWORD_RECOVERY_PENDING_KEY);
   const { error } = await supabase.auth.signOut();

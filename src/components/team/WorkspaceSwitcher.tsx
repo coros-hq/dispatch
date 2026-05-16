@@ -16,6 +16,9 @@ import { getMyTeamRole } from "@/lib/teamService";
 import { roleLabel } from "@/lib/team-utils";
 import type { Team } from "@/types/team";
 import { CreateTeamDialog } from "./CreateTeamDialog";
+import { PLAN_LIMITS } from "@/lib/planLimits";
+import { usePlanStore } from "@/store/plan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
 
 type Props = {
   memberCount?: number;
@@ -32,6 +35,9 @@ export function WorkspaceSwitcher({ memberCount, onWorkspaceChange }: Props) {
     setActiveRole,
   } = useTeamStore();
   const [createOpen, setCreateOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const { plan } = usePlanStore();
+  const canUseTeams = PLAN_LIMITS[plan].canUseTeams;
 
   const activeTeam = teams.find((t) => t.id === activeTeamId);
   const workspaceLabel = activeTeam ? activeTeam.name : "Personal";
@@ -43,6 +49,10 @@ export function WorkspaceSwitcher({ memberCount, onWorkspaceChange }: Props) {
   };
 
   const selectTeam = async (team: Team) => {
+    if (!canUseTeams) {
+      setUpgradeOpen(true);
+      return;
+    }
     setActiveTeamId(team.id);
     try {
       const role = await getMyTeamRole(team.id);
@@ -53,8 +63,21 @@ export function WorkspaceSwitcher({ memberCount, onWorkspaceChange }: Props) {
     onWorkspaceChange?.(team.id);
   };
 
+  const handleCreateTeam = () => {
+    if (!canUseTeams) {
+      setUpgradeOpen(true);
+      return;
+    }
+    setCreateOpen(true);
+  };
+
   return (
     <>
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        feature="Team workspaces"
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -80,7 +103,7 @@ export function WorkspaceSwitcher({ memberCount, onWorkspaceChange }: Props) {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setCreateOpen(true)}>
+          <DropdownMenuItem onClick={handleCreateTeam}>
             <PlusIcon className="w-4 h-4 mr-2" />
             Create team
           </DropdownMenuItem>

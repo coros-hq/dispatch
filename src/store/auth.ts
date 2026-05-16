@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { supabase } from "@/lib/supabase";
+import { fetchUserPlan, fetchUsage } from "@/lib/planService";
+import { usePlanStore } from "./plan";
 import type { User } from "@supabase/supabase-js";
 
 /** Set while the user is completing /reset-password; cleared on SIGNED_OUT. */
@@ -8,6 +10,17 @@ export const PASSWORD_RECOVERY_PENDING_KEY = "dispatch-password-recovery";
 
 const isRecoveryPending = () =>
   sessionStorage.getItem(PASSWORD_RECOVERY_PENDING_KEY) === "1";
+
+function loadUserPlan() {
+  usePlanStore.getState().setLoading(true);
+  fetchUserPlan().then((plan) => {
+    usePlanStore.getState().setPlan(plan);
+    usePlanStore.getState().setLoading(false);
+  });
+  fetchUsage().then(({ testEmailsSent, campaignsSent }) => {
+    usePlanStore.getState().setUsage(testEmailsSent, campaignsSent);
+  });
+}
 
 type AuthStore = {
   user: User | null;
@@ -55,9 +68,12 @@ supabase.auth.getSession().then(({ data }) => {
     useAuthStore.getState().setVerified(true);
     return;
   }
-  useAuthStore.getState().setUser(data.session?.user ?? null);
+  const user = data.session?.user ?? null;
+  useAuthStore.getState().setUser(user);
   useAuthStore.getState().setLoading(false);
   useAuthStore.getState().setVerified(true);
+  if (user) loadUserPlan();
+  else usePlanStore.getState().reset();
 });
 
 supabase.auth.onAuthStateChange((event, session) => {
@@ -65,6 +81,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     useAuthStore.getState().setUser(null);
     useAuthStore.getState().setLoading(false);
     useAuthStore.getState().setVerified(true);
+    usePlanStore.getState().reset();
     localStorage.removeItem("dispatch-auth");
     sessionStorage.removeItem(PASSWORD_RECOVERY_PENDING_KEY);
     return;
@@ -76,7 +93,10 @@ supabase.auth.onAuthStateChange((event, session) => {
     useAuthStore.getState().setVerified(true);
     return;
   }
-  useAuthStore.getState().setUser(session?.user ?? null);
+  const user = session?.user ?? null;
+  useAuthStore.getState().setUser(user);
   useAuthStore.getState().setLoading(false);
   useAuthStore.getState().setVerified(true);
+  if (user) loadUserPlan();
+  else usePlanStore.getState().reset();
 });

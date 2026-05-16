@@ -10,11 +10,16 @@ import type { Template } from "@/types";
 import { migrateTemplate } from "@/lib/template-service";
 import { TemplateCard } from "../canvas/TemplateCard";
 import { useNavigate } from "react-router";
+import { PLAN_LIMITS } from "@/lib/planLimits";
+import { usePlanStore } from "@/store/plan";
+import { UpgradePrompt } from "@/components/ui/UpgradePrompt";
 
 export default function TemplatePanel() {
   const { setMode, setPreviewTemplate, setTemplate, setCurrentProjectId } =
     useEditorStore();
   const { user } = useAuthStore();
+  const { plan } = usePlanStore();
+  const canAccessCommunity = PLAN_LIMITS[plan].canAccessCommunityTemplates;
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] =
     useState<SavedTemplate | null>(null);
@@ -138,15 +143,23 @@ export default function TemplatePanel() {
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest px-1">
                   Community
                 </p>
-                {publicTemplates.map((t) => (
-                  <TemplateCard
-                    key={t.id}
-                    template={t}
-                    isSelected={selectedTemplate?.id === t.id}
-                    onClick={() => handleClick(t)}
-                    showDelete={false}
+                {canAccessCommunity ? (
+                  publicTemplates.map((t) => (
+                    <TemplateCard
+                      key={t.id}
+                      template={t}
+                      isSelected={selectedTemplate?.id === t.id}
+                      onClick={() => handleClick(t)}
+                      showDelete={false}
+                    />
+                  ))
+                ) : (
+                  <UpgradePrompt
+                    feature="Community templates"
+                    description="Browse templates shared by the community."
+                    compact
                   />
-                ))}
+                )}
               </div>
             )}
           </>

@@ -45,6 +45,7 @@ type EditorStore = {
   renameCanvas: (canvasId: string, name: string) => void;
   removeCanvas: (canvasId: string) => void;
   setActiveCanvas: (canvasId: string) => void;
+  reorderCanvases: (pageId: string, activeId: string, overId: string) => void;
   duplicateCanvas: (canvasId: string) => void;
 
   // Mode
@@ -404,6 +405,21 @@ export const useEditorStore = create<EditorStore>()(
             },
             selection: { type: "none" },
           })),
+
+        reorderCanvases: (pageId, activeId, overId) =>
+          set((state) => {
+            const pages = state.template.pages.map((p) => {
+              if (p.id !== pageId) return p;
+              const canvases = [...p.canvases];
+              const oldIndex = canvases.findIndex((c) => c.id === activeId);
+              const newIndex = canvases.findIndex((c) => c.id === overId);
+              if (oldIndex === -1 || newIndex === -1) return p;
+              const [moved] = canvases.splice(oldIndex, 1);
+              canvases.splice(newIndex, 0, moved);
+              return { ...p, canvases };
+            });
+            return { template: { ...state.template, pages } };
+          }),
 
         duplicateCanvas: (canvasId) =>
           set((state) => {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { PlusIcon, LogOutIcon, UserIcon } from "lucide-react";
+import { PlusIcon, LogOutIcon, UserIcon, ZapIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -34,6 +34,10 @@ import {
   getMyTeamRole,
 } from "@/lib/teamService";
 import { useSyncTeamRole } from "@/hooks/useSyncTeamRole";
+import { PLAN_LIMITS } from "@/lib/planLimits";
+import { usePlanStore } from "@/store/plan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
+import { UpgradePrompt } from "@/components/ui/UpgradePrompt";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -52,6 +56,11 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"updated" | "created" | "name">("updated");
   const [memberCount, setMemberCount] = useState<number | undefined>();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const { plan } = usePlanStore();
+  const limits = PLAN_LIMITS[plan];
+  const atProjectLimit =
+    !activeTeamId && projects.length >= limits.maxProjects;
 
   const activeTeam = teams.find((t) => t.id === activeTeamId);
   const canEdit = !activeTeamId || canEditTeam(activeRole);
@@ -161,6 +170,10 @@ export default function Dashboard() {
       toast.error("You don't have permission to create projects in this team");
       return;
     }
+    if (atProjectLimit) {
+      setUpgradeOpen(true);
+      return;
+    }
     const pageId = crypto.randomUUID();
     const canvasId = crypto.randomUUID();
     const inter = GOOGLE_FONT_PRESETS.find((p) => p.id === "inter")!;
@@ -259,6 +272,20 @@ export default function Dashboard() {
           </Button>
         </div>
         <div className="flex items-center gap-3">
+          {plan === "pro" ? (
+            <span className="text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">
+              PRO
+            </span>
+          ) : (
+            <Button
+              size="sm"
+              className="h-7 text-xs bg-amber-500 hover:bg-amber-600 text-black"
+              onClick={() => setUpgradeOpen(true)}
+            >
+              <ZapIcon className="w-3 h-3 mr-1" />
+              Upgrade
+            </Button>
+          )}
           <Button
             variant="destructive"
             size="sm"
@@ -270,6 +297,8 @@ export default function Dashboard() {
           </Button>
         </div>
       </header>
+
+      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
 
       <main className="max-w-6xl mx-auto px-6 py-10">
         <h1 className="text-3xl mb-8 text-white font-semibold">
@@ -327,6 +356,13 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {atProjectLimit && !activeTeamId && (
+          <UpgradePrompt
+            feature="Unlimited projects"
+            description={`Free plan includes ${limits.maxProjects} projects. Upgrade to Pro for unlimited.`}
+          />
+        )}
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

@@ -2,6 +2,7 @@ import type {
   Block,
   Canvas,
   Column,
+  Page,
   Section,
   Template,
 } from "../types";
@@ -674,6 +675,44 @@ function renderBlockCode(block: Block): string {
     default:
       return "";
   }
+}
+
+export function pageToHtml(page: Page): string {
+  const globalStyles = page.canvases[0]?.globalStyles ?? {
+    fontFamily: "Inter, sans-serif",
+    bgColor: "#f4f4f4",
+    contentWidth: 600,
+  };
+
+  const allSections = page.canvases.flatMap((c) => c.sections);
+  const hasCountdown = page.canvases.some(canvasHasCountdown);
+  const fontFace = globalStyles.googleFontCssImportUrl
+    ? `<style>@import url(${JSON.stringify(globalStyles.googleFontCssImportUrl)});</style>`
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <title></title>
+  ${fontFace}
+</head>
+<body style="margin:0;padding:0;background-color:${globalStyles.bgColor};font-family:${globalStyles.fontFamily};">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:${globalStyles.bgColor};">
+    <tr>
+      <td align="center" style="padding:0;">
+        <table role="presentation" cellpadding="0" cellspacing="0" width="${globalStyles.contentWidth}" style="max-width:${globalStyles.contentWidth}px;width:100%;">
+          ${allSections.map((s) => renderSection(s, globalStyles.contentWidth)).join("")}
+        </table>
+      </td>
+    </tr>
+  </table>
+  ${hasCountdown ? countdownInlineScript() : ""}
+</body>
+</html>`;
 }
 
 export function canvasToHtml(canvas: Canvas): string {

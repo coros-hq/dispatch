@@ -6,6 +6,7 @@ import {
   templateToReactCode,
 } from "../../lib/renderer";
 import SendTestModal from "./SendTestModal";
+import EmailPreviewModal from "./EmailPreviewModal";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Logo from "@/assets/logo.svg";
@@ -25,6 +26,7 @@ import {
   LayoutTemplateIcon,
 } from "lucide-react";
 import SaveTemplateModal from "./SaveTemplateModal";
+import VersionHistoryModal from "./VersionHistoryModal";
 import { updateTemplate } from "@/lib/template-service";
 import {
   DropdownMenu,
@@ -130,6 +132,7 @@ export default function Toolbar() {
         >
           <Redo2Icon className="w-4 h-4" />
         </Button>
+        {currentProjectId && <VersionHistoryModal />}
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <img src={Logo} alt="Dispatch Logo" className="w-6 h-6" />
@@ -231,6 +234,7 @@ export default function Toolbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        <EmailPreviewModal />
         <SendTestModal />
         {canEdit && (
           <span data-tour="toolbar-save">
