@@ -6,7 +6,7 @@ import { usePlanStore } from "./plan";
 import type { User } from "@supabase/supabase-js";
 
 /** Set while the user is completing /reset-password; cleared on SIGNED_OUT. */
-export const PASSWORD_RECOVERY_PENDING_KEY = "dispatch-password-recovery";
+export const PASSWORD_RECOVERY_PENDING_KEY = "mailshot-password-recovery";
 
 const isRecoveryPending = () =>
   sessionStorage.getItem(PASSWORD_RECOVERY_PENDING_KEY) === "1";
@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore>()(
       setVerified: (verified) => set({ verified }),
     }),
     {
-      name: "dispatch-auth",
+      name: "mailshot-auth",
       partialize: (state) => ({ user: state.user }),
     },
   ),
@@ -59,7 +59,7 @@ if (window.location.hash.includes("type=recovery")) {
 // async code runs. Clear it immediately so the reset-password page renders.
 if (isRecoveryPending()) {
   useAuthStore.getState().setUser(null);
-  localStorage.removeItem("dispatch-auth");
+  localStorage.removeItem("mailshot-auth");
 }
 
 supabase.auth.getSession().then(({ data }) => {
@@ -82,7 +82,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     useAuthStore.getState().setLoading(false);
     useAuthStore.getState().setVerified(true);
     usePlanStore.getState().reset();
-    localStorage.removeItem("dispatch-auth");
+    localStorage.removeItem("mailshot-auth");
     sessionStorage.removeItem(PASSWORD_RECOVERY_PENDING_KEY);
     return;
   }

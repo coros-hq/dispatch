@@ -125,7 +125,7 @@ export default function ProfilePage() {
           >
             <ArrowLeftIcon className="w-4 h-4" />
           </Button>
-          <img src={Logo} alt="Dispatch" className="w-7 h-7" />
+          <img src={Logo} alt="MailShot" className="w-7 h-7" />
           <span className="text-base font-semibold text-foreground">
             Profile
           </span>

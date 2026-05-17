@@ -69,9 +69,9 @@ export default function TemplatesPage() {
           className="flex items-center gap-2.5 cursor-pointer"
           onClick={() => navigate(user ? "/" : "/sign-in")}
         >
-          <img src={Logo} alt="Dispatch" className="w-7 h-7" />
+          <img src={Logo} alt="MailShot" className="w-7 h-7" />
           <span className="text-base font-semibold text-foreground">
-            Dispatch
+            MailShot
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -188,7 +188,7 @@ export default function TemplatesPage() {
                 ) : (
                   <UpgradePrompt
                     feature="Community templates"
-                    description="Browse and use templates shared by the Dispatch community."
+                    description="Browse and use templates shared by the MailShot community."
                   />
                 )}
               </div>

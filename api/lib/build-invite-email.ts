@@ -10,9 +10,9 @@ export function buildInviteEmailPayload(params: InviteEmailParams) {
   const { to, teamName, inviterName, role, inviteUrl } = params;
 
   return {
-    from: "dispatch@coros.click",
+    from: "mailshot@coros.click",
     to,
-    subject: `${inviterName} invited you to join ${teamName} on Dispatch`,
+    subject: `${inviterName} invited you to join ${teamName} on MailShot`,
     html: `
         <div style="font-family:Inter,sans-serif;max-width:560px;margin:0 auto;padding:40px 24px;">
           <h2 style="font-size:24px;color:#111;margin-bottom:8px;">You're invited to ${teamName}</h2>

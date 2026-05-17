@@ -59,8 +59,8 @@ function dcParts(iso){
   return {ex:0,d:d,h:h,m:m,s:s};
 }
 function tick(root){
-  var iso=root.getAttribute("data-dispatch-countdown"); if(!iso) return;
-  var msg=root.getAttribute("data-dispatch-expired")||"Ended";
+  var iso=root.getAttribute("data-mailshot-countdown"); if(!iso) return;
+  var msg=root.getAttribute("data-mailshot-expired")||"Ended";
   var live=root.querySelector("[data-dc-live]");
   var ex=root.querySelector("[data-dc-expired]");
   if(!live||!ex) return;
@@ -76,7 +76,7 @@ function tick(root){
   function set(k,v){var n=root.querySelector('[data-dc="'+k+'"]'); if(n)n.textContent=String(v);}
   set("d",p.d); set("h",p.h); set("m",p.m); set("s",p.s);
 }
-function run(){document.querySelectorAll("[data-dispatch-countdown]").forEach(tick);}
+function run(){document.querySelectorAll("[data-mailshot-countdown]").forEach(tick);}
 run(); setInterval(run,1000);
 })();
 <\/script>`;
@@ -264,7 +264,7 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
 
       return `
   <tr><td align="${ta}" style="padding:22px 20px;background-color:${bg};">
-    <div data-dispatch-countdown="${isoAttr}" data-dispatch-expired="${expiredMsg}">
+    <div data-mailshot-countdown="${isoAttr}" data-mailshot-expired="${expiredMsg}">
       ${liveBlock}
     </div>
   </td></tr>`;
@@ -758,7 +758,7 @@ export function templateToHtmlAllPages(template: Template): string {
     for (const canvas of page.canvases) {
       i += 1;
       parts.push(
-        `<!-- Dispatch — ${page.name} · ${canvas.name} (${i}/${total}) -->\n${canvasToHtml(canvas)}`,
+        `<!-- MailShot — ${page.name} · ${canvas.name} (${i}/${total}) -->\n${canvasToHtml(canvas)}`,
       );
     }
   }

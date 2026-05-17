@@ -21,7 +21,7 @@ export const useTeamStore = create<TeamStore>()(
       setActiveRole: (role) => set({ activeRole: role }),
       setTeams: (teams) => set({ teams }),
     }),
-    { name: "dispatch-team" },
+    { name: "mailshot-team" },
   ),
 );
 

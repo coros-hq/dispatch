@@ -61,7 +61,7 @@ export function TemplatePreview({ variant }: { variant: Variant }) {
           >
             50% OFF
           </p>
-          <p className="text-[9px] text-white/80">Use code DISPATCH50</p>
+          <p className="text-[9px] text-white/80">Use code MAILSHOT50</p>
         </div>
         <div className="bg-white p-4">
           <p className="text-[10px] font-bold text-gray-900 mb-1">

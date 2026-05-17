@@ -65,7 +65,7 @@ export default function SendTestModal() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "dispatch@coros.click",
+          from: "mailshot@coros.click",
           to: email,
           subject: `Test: ${template.name} — ${found.label}`,
           html,

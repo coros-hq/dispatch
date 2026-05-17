@@ -11,7 +11,7 @@ export default function Loader({ text = "Loading..." }: Props) {
         {/* Spinning ring */}
         <div className="h-16 w-16 animate-spin rounded-full border-2 border-border border-t-primary" />
         {/* Logo in center */}
-        <img src={Logo} alt="Dispatch" className="absolute h-7 w-7" />
+        <img src={Logo} alt="MailShot" className="absolute h-7 w-7" />
       </div>
       <p className="text-sm text-muted-foreground animate-pulse">{text}</p>
     </div>

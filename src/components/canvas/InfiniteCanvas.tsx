@@ -39,7 +39,7 @@ export default function InfiniteCanvas() {
   useEffect(() => {
     for (const url of googleFontUrls) {
       const id =
-        "dispatch-gfont-" +
+        "mailshot-gfont-" +
         url.replace(/[^a-zA-Z0-9]+/g, "_").slice(0, 96);
       if (document.getElementById(id)) continue;
       const link = document.createElement("link");

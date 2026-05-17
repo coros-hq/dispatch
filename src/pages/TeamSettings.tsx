@@ -218,9 +218,9 @@ export default function TeamSettings() {
     <div className="min-h-screen bg-muted">
       <header className="h-14 border-b border-white/20 flex items-center justify-between px-6">
         <div className="flex items-center gap-2.5">
-          <img src={Logo} alt="Dispatch" className="w-7 h-7" />
+          <img src={Logo} alt="MailShot" className="w-7 h-7" />
           <span className="text-base font-semibold text-foreground">
-            Dispatch
+            MailShot
           </span>
           <Separator className="bg-white/20" orientation="vertical" />
           <Button

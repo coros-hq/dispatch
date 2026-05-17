@@ -7,7 +7,7 @@ export default function NotFound() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6">
-      <img src={Logo} alt="Dispatch" className="w-12 h-12 opacity-50" />
+      <img src={Logo} alt="MailShot" className="w-12 h-12 opacity-50" />
 
       <div className="text-center">
         <h1 className="text-6xl font-bold text-foreground mb-2">404</h1>

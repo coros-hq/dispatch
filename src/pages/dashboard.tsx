@@ -242,9 +242,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-muted">
       <header className="h-14 border-b border-white/20 flex items-center justify-between px-6">
         <div className="flex items-center gap-2.5">
-          <img src={Logo} alt="Dispatch" className="w-7 h-7" />
+          <img src={Logo} alt="MailShot" className="w-7 h-7" />
           <span className="text-base font-semibold text-foreground">
-            Dispatch
+            MailShot
           </span>
           <Separator
             className="text-white bg-white/20"
@@ -376,7 +376,7 @@ export default function Dashboard() {
         ) : sortedProjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
-              <img src={Logo} alt="Dispatch" className="w-7 h-7 opacity-40" />
+              <img src={Logo} alt="MailShot" className="w-7 h-7 opacity-40" />
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-foreground">

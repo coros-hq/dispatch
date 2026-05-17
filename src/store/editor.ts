@@ -654,7 +654,7 @@ export const useEditorStore = create<EditorStore>()(
           set((state) => ({ template: { ...state.template, name } })),
       }),
       {
-        name: "dispatch-editor",
+        name: "mailshot-editor",
         onRehydrateStorage: () => (state) => {
           if (!state?.template) return;
           state.template = migrateTemplate(state.template as any);

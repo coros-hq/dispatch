@@ -3,14 +3,14 @@ import type { TooltipRenderProps, Step } from "react-joyride";
 import { useState, useEffect } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 
-const TOUR_KEY = "dispatch-tour-complete";
+const TOUR_KEY = "mailshot-tour-complete";
 
 const steps: Step[] = [
   {
     target: '[data-tour="infinite-canvas"]',
     content:
       "Let's take a quick tour to get you started building beautiful newsletters.",
-    title: "Welcome to Dispatch ✉",
+    title: "Welcome to MailShot ✉",
     placement: "center" as const,
     skipBeacon: true,
     hideOverlay: true,

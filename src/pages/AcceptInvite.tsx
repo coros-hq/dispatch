@@ -103,7 +103,7 @@ export default function AcceptInvite() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={Logo} alt="Dispatch" className="w-10 h-10" />
+            <img src={Logo} alt="MailShot" className="w-10 h-10" />
           </div>
           <CardTitle>Join {teamName}</CardTitle>
           <CardDescription>

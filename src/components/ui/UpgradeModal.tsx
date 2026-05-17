@@ -132,7 +132,7 @@ function UpgradeModalContent({
             <p className="text-sm text-muted-foreground max-w-xs">
               We&apos;ll reach out to{" "}
               <strong className="text-foreground">{email}</strong> shortly with
-              early access to Dispatch Pro.
+              early access to MailShot Pro.
             </p>
             <Button onClick={onClose} className="mt-2">
               Close

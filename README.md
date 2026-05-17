@@ -1,14 +1,14 @@
-![Dispatch](src/assets/logo.svg)
-# Dispatch
+![MailShot](src/assets/logo.svg)
+# MailShot
 
 > Open-source email newsletter builder — drag & drop canvas, live code editor, built-in compatibility testing.
 
 
 ---
 
-## What is Dispatch?
+## What is MailShot?
 
-Dispatch is a developer-friendly newsletter builder that lets you visually compose email templates and export battle-tested, email-client-compatible HTML. No subscriptions, no platform lock-in — just build and export.
+MailShot is a developer-friendly newsletter builder that lets you visually compose email templates and export battle-tested, email-client-compatible HTML. No subscriptions, no platform lock-in — just build and export.
 
 ---
 
@@ -50,8 +50,8 @@ Dispatch is a developer-friendly newsletter builder that lets you visually compo
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/dispatch.git
-cd dispatch
+git clone https://github.com/yourusername/mailshot.git
+cd mailshot
 npm install
 ```
 

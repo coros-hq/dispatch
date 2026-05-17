@@ -45,7 +45,7 @@ export async function resetPassword(password: string) {
 export async function signOut() {
   useAuthStore.getState().setUser(null);
   usePlanStore.getState().reset();
-  localStorage.removeItem("dispatch-auth");
+  localStorage.removeItem("mailshot-auth");
   sessionStorage.removeItem(PASSWORD_RECOVERY_PENDING_KEY);
   const { error } = await supabase.auth.signOut();
   if (error) throw error;

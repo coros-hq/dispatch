@@ -67,9 +67,9 @@ export default function SignIn() {
 
       <CardHeader className="justify-center gap-6 text-center">
         <div className="flex items-center justify-center gap-2.5">
-          <img src={Logo} alt="Dispatch" className="w-9 h-9" />
+          <img src={Logo} alt="MailShot" className="w-9 h-9" />
           <span className="text-xl font-semibold text-foreground">
-            Dispatch
+            MailShot
           </span>
         </div>
         <div>

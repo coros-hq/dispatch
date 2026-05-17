@@ -117,7 +117,7 @@ const BLOCK_DEFAULTS = [
   {
     type: "testimonial" as const,
     quote:
-      "Dispatch made our launch emails effortless—open rates doubled in a week.",
+      "MailShot made our launch emails effortless—open rates doubled in a week.",
     authorName: "Alex Morgan",
     authorTitle: "Head of Growth, Acme",
     avatarSrc: "https://placehold.co/88x88/png?text=AM",
@@ -129,7 +129,7 @@ const BLOCK_DEFAULTS = [
   },
   {
     type: "coupon" as const,
-    code: "DISPATCH50",
+    code: "MAILSHOT50",
     description: "Use at checkout",
     bgColor: "#fdfdfd",
     borderColor: "#1e293b",

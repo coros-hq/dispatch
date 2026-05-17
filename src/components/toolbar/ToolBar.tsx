@@ -135,7 +135,7 @@ export default function Toolbar() {
         {currentProjectId && <VersionHistoryModal />}
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
-          <img src={Logo} alt="Dispatch Logo" className="w-6 h-6" />
+          <img src={Logo} alt="MailShot Logo" className="w-6 h-6" />
           <input
             value={template.name}
             onChange={(e) => renameTemplate(e.target.value)}
