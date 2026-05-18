@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUploader } from "@/components/ui/ImageUploader";
 
 export default function PropsPanel() {
   const {
@@ -508,16 +509,17 @@ export default function PropsPanel() {
         {/* IMAGE BLOCK */}
         {block.type === "image" && (
           <>
-            <Field label="Image URL">
-              <Input
+            <Field label="Image">
+              <ImageUploader
                 value={block.src}
-                onChange={(e) => update({ src: e.target.value })}
+                onChange={(url) => update({ src: url })}
               />
             </Field>
             <Field label="Alt text">
               <Input
                 value={block.alt}
                 onChange={(e) => update({ alt: e.target.value })}
+                placeholder="Describe the image"
               />
             </Field>
             <Field label="Width">
@@ -876,10 +878,10 @@ export default function PropsPanel() {
 
         {block.type === "product-card" && (
           <>
-            <Field label="Image URL">
-              <Input
+            <Field label="Image">
+              <ImageUploader
                 value={block.image}
-                onChange={(e) => update({ image: e.target.value })}
+                onChange={(url) => update({ image: url })}
               />
             </Field>
             <Field label="Title">
@@ -1524,12 +1526,10 @@ export default function PropsPanel() {
 
         {block.type === "hero" && (
           <>
-            <Field label="Background image URL">
-              <Input
+            <Field label="Background image">
+              <ImageUploader
                 value={block.backgroundImage}
-                onChange={(e) =>
-                  update({ backgroundImage: e.target.value })
-                }
+                onChange={(url) => update({ backgroundImage: url })}
               />
             </Field>
             <Field label="Title">
