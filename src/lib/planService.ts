@@ -25,11 +25,12 @@ export async function fetchUserPlan(): Promise<Plan> {
 export async function fetchUsage(): Promise<{
   testEmailsSent: number;
   campaignsSent: number;
+  contactsThisMonth: number;
 }> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { testEmailsSent: 0, campaignsSent: 0 };
+  if (!user) return { testEmailsSent: 0, campaignsSent: 0, contactsThisMonth: 0 };
 
   const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -43,11 +44,13 @@ export async function fetchUsage(): Promise<{
   return {
     testEmailsSent: data?.test_emails_sent ?? 0,
     campaignsSent: data?.campaigns_sent ?? 0,
+    contactsThisMonth: data?.contacts_this_month ?? 0,
   };
 }
 
 export async function incrementUsage(
-  field: "test_emails_sent" | "campaigns_sent",
+  field: "test_emails_sent" | "campaigns_sent" | "contacts_this_month",
+  amount = 1,
 ): Promise<void> {
   const {
     data: { user },
@@ -60,5 +63,6 @@ export async function incrementUsage(
     p_user_id: user.id,
     p_field: field,
     p_month: currentMonth,
+    p_amount: amount,
   });
 }

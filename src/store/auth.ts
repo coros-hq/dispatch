@@ -17,8 +17,8 @@ function loadUserPlan() {
     usePlanStore.getState().setPlan(plan);
     usePlanStore.getState().setLoading(false);
   });
-  fetchUsage().then(({ testEmailsSent, campaignsSent }) => {
-    usePlanStore.getState().setUsage(testEmailsSent, campaignsSent);
+  fetchUsage().then(({ testEmailsSent, campaignsSent, contactsThisMonth }) => {
+    usePlanStore.getState().setUsage(testEmailsSent, campaignsSent, contactsThisMonth);
   });
 }
 

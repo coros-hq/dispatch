@@ -276,7 +276,6 @@ function CanvasFrame({
                 onClick={(e) => {
                   e.stopPropagation();
                   addSection(1);
-                  setTimeout(() => addSection(1), 0);
                 }}
                 className="text-xs px-4 py-2 rounded-lg bg-muted border border-border text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
               >

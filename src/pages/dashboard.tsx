@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { PlusIcon, LogOutIcon, UserIcon, ZapIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -38,9 +38,12 @@ import { PLAN_LIMITS } from "@/lib/planLimits";
 import { usePlanStore } from "@/store/plan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { UpgradePrompt } from "@/components/ui/UpgradePrompt";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CampaignsTab } from "@/components/dashboard/CampaignsTab";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
   const { setTemplate, setCurrentProjectId } = useEditorStore();
   const {
@@ -149,6 +152,21 @@ export default function Dashboard() {
     },
     [user?.id],
   );
+
+  useEffect(() => {
+    const connected = searchParams.get("connected");
+    const error = searchParams.get("error");
+    if (connected === "gmail") {
+      toast.success("Gmail connected successfully");
+      setSearchParams({}, { replace: true });
+    } else if (connected === "outlook") {
+      toast.success("Outlook connected successfully");
+      setSearchParams({}, { replace: true });
+    } else if (error) {
+      toast.error(`Connection failed: ${error}`);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     loadTeams();
@@ -305,6 +323,14 @@ export default function Dashboard() {
           👋 Hello {user?.user_metadata?.first_name}{" "}
           {user?.user_metadata?.last_name} !
         </h1>
+
+        <Tabs defaultValue="projects">
+          <TabsList className="mb-8">
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="projects">
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">
@@ -410,6 +436,12 @@ export default function Dashboard() {
             ))}
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="campaigns">
+            <CampaignsTab />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

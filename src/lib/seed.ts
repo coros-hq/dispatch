@@ -1,8 +1,5 @@
 import { supabase } from "./supabase";
-import {
-  STARTER_TEMPLATES,
-  STARTER_TEMPLATE_CATEGORIES,
-} from "./templates";
+import { STARTER_TEMPLATES, STARTER_TEMPLATE_CATEGORIES } from "./templates";
 import { migrateTemplate } from "./template-service";
 
 export async function seedDefaultTemplates() {

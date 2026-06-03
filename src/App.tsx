@@ -87,9 +87,9 @@ export default function App() {
                     <TabsTrigger value="code" className="text-xs">
                       Code
                     </TabsTrigger>
-                    <TabsTrigger value="compatibility" className="text-xs">
+                    {/* <TabsTrigger value="compatibility" className="text-xs">
                       Compatibility
-                    </TabsTrigger>
+                    </TabsTrigger> */}
                   </TabsList>
                   <TabsContent
                     value="props"

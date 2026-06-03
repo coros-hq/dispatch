@@ -7,23 +7,25 @@ import {
   buildInviteEmailPayload,
   type InviteEmailParams,
 } from "./api/lib/build-invite-email";
+import { adaptVercelHandler, readJsonBody } from "./api/lib/dev-adapter";
 
-function readJsonBody(req: IncomingMessage): Promise<unknown> {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    req.on("data", (chunk) => {
-      data += chunk;
-    });
-    req.on("end", () => {
-      try {
-        resolve(data ? JSON.parse(data) : {});
-      } catch {
-        reject(new Error("Invalid JSON body"));
-      }
-    });
-    req.on("error", reject);
-  });
-}
+const CAMPAIGN_API_ROUTES: Record<
+  string,
+  () => Promise<{
+    default: (
+      req: import("@vercel/node").VercelRequest,
+      res: import("@vercel/node").VercelResponse,
+    ) => Promise<unknown>;
+  }>
+> = {
+  "/api/auth/gmail": () => import("./api/auth/gmail"),
+  "/api/auth/gmail/callback": () => import("./api/auth/gmail/callback"),
+  "/api/auth/outlook": () => import("./api/auth/outlook"),
+  "/api/auth/outlook/callback": () => import("./api/auth/outlook/callback"),
+  "/api/send-campaign": () => import("./api/send-campaign"),
+  "/api/unsubscribe": () => import("./api/unsubscribe"),
+  "/api/smtp-verify": () => import("./api/smtp-verify"),
+};
 
 function inviteApiDevPlugin(env: Record<string, string>): Plugin {
   return {
@@ -35,8 +37,45 @@ function inviteApiDevPlugin(env: Record<string, string>): Plugin {
           res: ServerResponse,
           next: (err?: Error) => void,
         ) => {
-          const url = req.url?.split("?")[0];
-          if (url !== "/api/invite") return next();
+          const rawUrl = req.url ?? "/";
+          const parsedUrl = new URL(rawUrl, "http://localhost");
+          const pathname = parsedUrl.pathname;
+
+          const campaignRoute = CAMPAIGN_API_ROUTES[pathname];
+          if (campaignRoute) {
+            if (!process.env.APP_URL) {
+              process.env.APP_URL = `http://localhost:${server.config.server.port}`;
+            }
+            process.env.VITE_SUPABASE_URL ??= env.VITE_SUPABASE_URL;
+            process.env.SUPABASE_URL ??= env.VITE_SUPABASE_URL;
+            process.env.VITE_SUPABASE_SERVICE_KEY ??=
+              env.VITE_SUPABASE_SERVICE_KEY;
+            process.env.GOOGLE_CLIENT_ID ??= env.GOOGLE_CLIENT_ID;
+            process.env.GOOGLE_CLIENT_SECRET ??= env.GOOGLE_CLIENT_SECRET;
+            process.env.MICROSOFT_CLIENT_ID ??= env.MICROSOFT_CLIENT_ID;
+            process.env.MICROSOFT_CLIENT_SECRET ??= env.MICROSOFT_CLIENT_SECRET;
+
+            try {
+              const mod = await campaignRoute();
+              const body =
+                req.method === "POST" ? await readJsonBody(req) : undefined;
+              await adaptVercelHandler(mod.default)(req, res, parsedUrl, body);
+            } catch (err) {
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              res.end(
+                JSON.stringify({
+                  error:
+                    err instanceof Error
+                      ? err.message
+                      : "Internal server error",
+                }),
+              );
+            }
+            return;
+          }
+
+          if (pathname !== "/api/invite") return next();
 
           if (req.method !== "POST") {
             res.statusCode = 405;

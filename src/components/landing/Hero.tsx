@@ -13,10 +13,6 @@ export function Hero() {
       />
       <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-16 md:pt-24">
         <div className="mx-auto max-w-4xl text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Open source · MIT licensed
-          </div>
           <h1 className="font-serif text-5xl leading-[1.02] tracking-tight text-foreground md:text-7xl lg:text-[88px]">
             Build newsletters
             <br />

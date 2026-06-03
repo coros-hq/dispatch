@@ -6,6 +6,7 @@ import {
   templateToReactCode,
 } from "../../lib/renderer";
 import SendTestModal from "./SendTestModal";
+import CampaignModal from "./CampaignModal";
 import EmailPreviewModal from "./EmailPreviewModal";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -57,10 +58,7 @@ export default function Toolbar() {
   const canEdit = !readOnly;
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | null>(null);
 
-  const copy = (
-    text: string,
-    kind: "html" | "html-all" | "code",
-  ) => {
+  const copy = (text: string, kind: "html" | "html-all" | "code") => {
     navigator.clipboard.writeText(text);
     setCopied(kind);
     setTimeout(() => setCopied(null), 2000);
@@ -175,15 +173,6 @@ export default function Toolbar() {
 
       {/* Right */}
       <div className="flex items-center gap-2">
-        <Button
-          variant={mode === "preview" ? "default" : "outline"}
-          size="sm"
-          onClick={handleTemplates}
-        >
-          <LayoutTemplateIcon className="w-3.5 h-3.5 mr-2" />
-          Templates
-        </Button>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -233,9 +222,18 @@ export default function Toolbar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <Button
+          variant={mode === "preview" ? "default" : "outline"}
+          size="sm"
+          onClick={handleTemplates}
+        >
+          <LayoutTemplateIcon className="w-3.5 h-3.5 mr-2" />
+          Templates
+        </Button>
 
         <EmailPreviewModal />
         <SendTestModal />
+        {canEdit && <CampaignModal />}
         {canEdit && (
           <span data-tour="toolbar-save">
             <SaveTemplateModal />

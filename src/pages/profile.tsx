@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -23,6 +24,7 @@ import {
 import type { Profile } from "@/lib/profile-service";
 import { useAuthStore } from "@/store/auth";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import { SendingSettings } from "@/components/settings/SendingSettings";
 import Logo from "@/assets/logo.svg";
 import Loader from "@/components/loader";
 
@@ -134,6 +136,13 @@ export default function ProfilePage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-6 py-10 flex flex-col gap-6">
+        <Tabs defaultValue="account">
+          <TabsList>
+            <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsTrigger value="sending">Sending</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="account" className="flex flex-col gap-6 mt-6">
         {/* Personal info */}
         <Card>
           <CardHeader>
@@ -340,6 +349,12 @@ export default function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="sending" className="mt-6">
+            <SendingSettings />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

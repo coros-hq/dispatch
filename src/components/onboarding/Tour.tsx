@@ -230,18 +230,6 @@ export default function Tour() {
     };
   }, []);
 
-  //   useEffect(() => {
-  //     const done = localStorage.getItem(TOUR_KEY);
-  //     console.log("tour done:", done);
-  //     if (!done) {
-  //       console.log("starting tour...");
-  //       setTimeout(() => {
-  //         console.log("setting run to true");
-  //         setRun(true);
-  //       }, 1000);
-  //     }
-  //   }, []);
-
   return (
     <Joyride
       steps={steps}
