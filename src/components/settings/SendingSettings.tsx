@@ -182,7 +182,7 @@ export function SendingSettings() {
             </div>
           </>
         )}
-        <SmtpConfigForm userId={user?.id} />
+        <SmtpConfigForm userId={user?.id || ""} />
       </CardContent>
     </Card>
   );

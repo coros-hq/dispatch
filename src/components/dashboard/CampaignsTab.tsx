@@ -17,6 +17,10 @@ function StatusBadge({ status }: { status: Campaign["status"] }) {
     Campaign["status"],
     { label: string; className: string }
   > = {
+    draft: {
+      label: "Draft",
+      className: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+    },
     sending: {
       label: "Sending",
       className: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -30,6 +34,7 @@ function StatusBadge({ status }: { status: Campaign["status"] }) {
       className: "bg-destructive/10 text-destructive border-destructive/20",
     },
   };
+
   const v = variants[status];
   return (
     <Badge variant="outline" className={v.className}>
@@ -135,7 +140,7 @@ export function CampaignsTab() {
                 <td className="px-4 py-3 text-muted-foreground text-xs">
                   {c.from_name} &lt;{c.from_email}&gt;
                 </td>
-                <td className="px-4 py-3 text-right">{c.recipient_count}</td>
+                <td className="px-4 py-3 text-right">{c.total_contacts}</td>
                 <td className="px-4 py-3 text-right text-green-500">
                   {c.sent_count}
                 </td>
@@ -170,13 +175,13 @@ export function CampaignsTab() {
                 </p>
                 <p>Date: {formatDate(selected.created_at)}</p>
                 <p>
-                  Recipients: {selected.recipient_count} · Sent:{" "}
+                  Recipients: {selected.total_contacts} · Sent:{" "}
                   {selected.sent_count} · Failed: {selected.failed_count}
                 </p>
               </div>
               <CampaignResults
                 sent={selected.sent_count}
-                failed={selected.failed_recipients ?? []}
+                failed={[]}
                 readOnly
               />
               <div className="flex justify-end">

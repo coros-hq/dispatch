@@ -2,9 +2,6 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 
-const BATCH_SIZE = 10;
-const BATCH_DELAY_MS = 500;
-
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -94,7 +91,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     (unsubscribed || []).map((u: any) => u.email.toLowerCase()),
   );
 
-  const appUrl = process.env.APP_URL || "";
   let sent = 0;
   const failed: { email: string; error: string }[] = [];
 

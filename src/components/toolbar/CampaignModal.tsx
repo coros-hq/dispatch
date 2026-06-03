@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useEditorStore, getActiveCanvas } from "../../store/editor";
 import { canvasToHtml } from "@/lib/renderer";
-import { sendCampaign } from "@/lib/campaignService";
 import {
   detectColumn,
   hasUnsubscribePlaceholder,
@@ -319,7 +318,7 @@ export default function CampaignModal() {
   };
 
   const handleSend = async () => {
-    if (!previewCanvas) return;
+    if (!previewCanvas || !accountId) return;
     setSendState("sending");
     setStep(4);
     setSendProgress({ current: 0, total: recipients.length });
@@ -327,28 +326,14 @@ export default function CampaignModal() {
     const html = canvasToHtml(previewCanvas.canvas);
 
     try {
-      let result: { sent: number; failed: { email: string; error: string }[] };
-
-      if (sendMode === "smtp") {
-        // SMTP path — calls your /api/send-campaign serverless function
-        result = await sendSmtpCampaign({
-          smtpConfigId: accountId,
-          userId: user!.id,
-          subject,
-          fromName,
-          canvasHtml: html,
-          recipients,
-        });
-      } else {
-        // Existing OAuth path — unchanged
-        result = await sendCampaign({
-          accountId,
-          subject,
-          fromName,
-          canvasHtml: html,
-          recipients,
-        });
-      }
+      const result = await sendSmtpCampaign({
+        smtpConfigId: accountId,
+        userId: user!.id,
+        subject,
+        fromName,
+        canvasHtml: html,
+        recipients,
+      });
 
       setResults({ sent: result.sent, failed: result.failed });
       setSendState("done");
