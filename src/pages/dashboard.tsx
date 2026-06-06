@@ -46,13 +46,8 @@ export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuthStore();
   const { setTemplate, setCurrentProjectId } = useEditorStore();
-  const {
-    activeTeamId,
-    activeRole,
-    teams,
-    setTeams,
-    setActiveRole,
-  } = useTeamStore();
+  const { activeTeamId, activeRole, teams, setTeams, setActiveRole } =
+    useTeamStore();
   useSyncTeamRole();
   const [projects, setProjects] = useState<SavedTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,8 +57,7 @@ export default function Dashboard() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const { plan } = usePlanStore();
   const limits = PLAN_LIMITS[plan];
-  const atProjectLimit =
-    !activeTeamId && projects.length >= limits.maxProjects;
+  const atProjectLimit = !activeTeamId && projects.length >= limits.maxProjects;
 
   const activeTeam = teams.find((t) => t.id === activeTeamId);
   const canEdit = !activeTeamId || canEditTeam(activeRole);
@@ -127,10 +121,7 @@ export default function Dashboard() {
         } else {
           const all = await fetchTemplates(searchTerm);
           templates = all.filter(
-            (t) =>
-              !t.is_default &&
-              t.user_id === user?.id &&
-              !t.team_id,
+            (t) => !t.is_default && t.user_id === user?.id && !t.team_id,
           );
         }
 
@@ -331,111 +322,116 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="projects">
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              {workspaceTitle}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {workspaceSubtitle}
-            </p>
-            {!canEdit && activeTeam && (
-              <p className="text-xs text-amber-500/90 mt-1">
-                View-only access — you can preview projects but not edit or save
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-3 mb-6">
-            <Input
-              placeholder="Search projects..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="max-w-full text-white"
-            />
-            <Select
-              value={sort}
-              onValueChange={(v) => setSort(v as typeof sort)}
-            >
-              <SelectTrigger className="w-56 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="updated">Last updated</SelectItem>
-                <SelectItem value="created">Date created</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-row items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/templates")}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Templates
-            </Button>
-            {canEdit && (
-              <Button onClick={handleNew}>
-                <PlusIcon className="w-4 h-4 mr-2" />
-                New project
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {atProjectLimit && !activeTeamId && (
-          <UpgradePrompt
-            feature="Unlimited projects"
-            description={`Free plan includes ${limits.maxProjects} projects. Upgrade to Pro for unlimited.`}
-          />
-        )}
-
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="h-48 rounded-xl border border-border bg-card animate-pulse"
-              />
-            ))}
-          </div>
-        ) : sortedProjects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
-              <img src={Logo} alt="MailShot" className="w-7 h-7 opacity-40" />
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <h1 className="text-2xl font-semibold text-foreground">
+                  {workspaceTitle}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {workspaceSubtitle}
+                </p>
+                {!canEdit && activeTeam && (
+                  <p className="text-xs text-amber-500/90 mt-1">
+                    View-only access — you can preview projects but not edit or
+                    save
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mb-6">
+                <Input
+                  placeholder="Search projects..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="max-w-full text-white"
+                />
+                <Select
+                  value={sort}
+                  onValueChange={(v) => setSort(v as typeof sort)}
+                >
+                  <SelectTrigger className="w-56 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="updated">Last updated</SelectItem>
+                    <SelectItem value="created">Date created</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-row items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/templates")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Templates
+                </Button>
+                {canEdit && (
+                  <Button onClick={handleNew}>
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    New project
+                  </Button>
+                )}
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-sm font-medium text-foreground">
-                No projects yet
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {canEdit
-                  ? "Create your first newsletter to get started"
-                  : "No team projects to show"}
-              </p>
-            </div>
-            {canEdit && (
-              <Button onClick={handleNew}>
-                <PlusIcon className="w-4 h-4 mr-2" />
-                New project
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {sortedProjects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onClick={() => handleOpen(project)}
-                onDelete={
-                  canEdit ? () => handleDelete(project.id) : undefined
-                }
-                canRename={canEdit}
+
+            {atProjectLimit && !activeTeamId && (
+              <UpgradePrompt
+                feature="Unlimited projects"
+                description={`Free plan includes ${limits.maxProjects} projects. Upgrade to Pro for unlimited.`}
               />
-            ))}
-          </div>
-        )}
+            )}
+
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-48 rounded-xl border border-border bg-card animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : sortedProjects.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                  <img
+                    src={Logo}
+                    alt="MailShot"
+                    className="w-7 h-7 opacity-40"
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium text-foreground">
+                    No projects yet
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {canEdit
+                      ? "Create your first newsletter to get started"
+                      : "No team projects to show"}
+                  </p>
+                </div>
+                {canEdit && (
+                  <Button onClick={handleNew}>
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    New project
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {sortedProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onClick={() => handleOpen(project)}
+                    onDelete={
+                      canEdit ? () => handleDelete(project.id) : undefined
+                    }
+                    canRename={canEdit}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="campaigns">

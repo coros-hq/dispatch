@@ -21,6 +21,7 @@ import { useEffect } from "react";
 import { useSyncTeamRole } from "@/hooks/useSyncTeamRole";
 import { canEditTeam, useTeamStore } from "@/store/team";
 import { ViewOnlyBanner } from "@/components/team/ViewOnlyBanner";
+import { ChatPanel } from "./components/ChatPanel";
 
 export default function App() {
   const mode = useEditorStore((s) => s.mode);
@@ -115,6 +116,8 @@ export default function App() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+      <ChatPanel />
+
       <Tour />
     </DndProvider>
   );

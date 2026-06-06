@@ -71,7 +71,11 @@ function CountdownBlockPreview({ block }: { block: CountdownBlock }) {
             style={{
               display: "flex",
               justifyContent:
-                ta === "center" ? "center" : ta === "right" ? "flex-end" : "flex-start",
+                ta === "center"
+                  ? "center"
+                  : ta === "right"
+                    ? "flex-end"
+                    : "flex-start",
               gap: 6,
               flexWrap: "wrap",
             }}
@@ -82,15 +86,26 @@ function CountdownBlockPreview({ block }: { block: CountdownBlock }) {
               [parts.minutes, lm, 28] as const,
               [parts.seconds, ls, 22] as const,
             ].map(([n, lbl, fs]) => (
-              <div key={lbl} style={{ ...cellStyle, minWidth: fs >= 26 ? 68 : 60 }}>
+              <div
+                key={lbl}
+                style={{ ...cellStyle, minWidth: fs >= 26 ? 68 : 60 }}
+              >
                 <p style={digitStyle(fs)}>{n}</p>
                 <p style={labelStyle}>{lbl}</p>
               </div>
             ))}
           </div>
-          <p style={{ margin: "14px 0 0", fontSize: 11, color: fg, opacity: 0.55 }}>
-            Seconds tick here; exported HTML includes a tiny script so it moves in browsers. Many inbox
-            clients strip scripts and show a frozen frame.
+          <p
+            style={{
+              margin: "14px 0 0",
+              fontSize: 11,
+              color: fg,
+              opacity: 0.55,
+            }}
+          >
+            Seconds tick here; exported HTML includes a tiny script so it moves
+            in browsers. Many inbox clients strip scripts and show a frozen
+            frame.
           </p>
         </>
       )}
@@ -166,7 +181,11 @@ export default function BlockRenderer({ block }: Props) {
           {block.linkHref?.trim() ? (
             <a
               href={block.linkHref.trim()}
-              style={{ display: "block", textDecoration: "none", border: "none" }}
+              style={{
+                display: "block",
+                textDecoration: "none",
+                border: "none",
+              }}
             >
               {img}
             </a>
@@ -247,70 +266,108 @@ export default function BlockRenderer({ block }: Props) {
         </div>
       );
 
-    case "product-card":
+    case "product-card": {
+      const aspectRatioMap: Record<string, string> = {
+        "1:1": "100%",
+        "4:3": "75%",
+        "16:9": "56.25%",
+        "3:2": "66.66%",
+      };
+      const paddingTop = aspectRatioMap[block.imageAspectRatio ?? "16:9"];
+
       return (
-        <div className="px-6 py-4">
-          {block.image && (
+        <div
+          style={{
+            backgroundColor: block.cardBgColor ?? "#ffffff",
+            border: `${block.cardBorderWidth ?? 0}px solid ${block.cardBorderColor ?? "transparent"}`,
+            borderRadius: block.cardBorderRadius ?? 0,
+            padding: block.cardPadding ?? 16,
+            fontFamily: "inherit",
+            textAlign: block.cardAlign ?? "left",
+          }}
+        >
+          {/* Image */}
+          <div
+            style={{
+              position: "relative",
+              width: "100%",
+              paddingTop,
+              overflow: "hidden",
+              borderRadius: block.imageBorderRadius ?? 0,
+              marginBottom: 12,
+            }}
+          >
             <img
               src={block.image}
               alt={block.title}
               style={{
+                position: "absolute",
+                inset: 0,
                 width: "100%",
-                display: "block",
-                borderRadius: 8,
-                marginBottom: 12,
+                height: "100%",
+                objectFit: "cover",
               }}
             />
-          )}
-          <p
+          </div>
+
+          {/* Title */}
+          <div
             style={{
-              margin: "0 0 4px",
-              fontSize: 18,
-              fontWeight: "bold",
-              color: "#111111",
+              fontSize: block.titleFontSize ?? 18,
+              fontWeight: block.titleFontWeight ?? "600",
+              fontFamily: block.titleFontFamily ?? "inherit",
+              color: block.titleColor ?? "#111111",
+              marginBottom: 6,
             }}
           >
             {block.title}
-          </p>
-          <p
+          </div>
+
+          {/* Description */}
+          <div
             style={{
-              margin: "0 0 8px",
-              fontSize: 14,
-              color: "#555555",
+              fontSize: block.descriptionFontSize ?? 14,
+              fontFamily: block.descriptionFontFamily ?? "inherit",
+              color: block.descriptionColor ?? "#555555",
+              marginBottom: 10,
               lineHeight: 1.5,
             }}
           >
             {block.description}
-          </p>
-          {block.price && (
-            <p
-              style={{
-                margin: "0 0 12px",
-                fontSize: 20,
-                fontWeight: "bold",
-                color: "#111111",
-              }}
-            >
-              {block.price}
-            </p>
-          )}
+          </div>
+
+          {/* Price */}
+          <div
+            style={{
+              fontSize: block.priceFontSize ?? 16,
+              fontWeight: block.priceFontWeight ?? "700",
+              color: block.priceColor ?? "#111111",
+              marginBottom: 14,
+            }}
+          >
+            {block.price}
+          </div>
+
+          {/* Button */}
           <a
             href={block.buttonHref}
             style={{
               display: "inline-block",
               backgroundColor: block.buttonBgColor,
               color: block.buttonTextColor,
-              padding: "10px 24px",
-              borderRadius: 6,
+              fontSize: block.buttonFontSize ?? 14,
+              fontWeight: "600",
+              borderRadius: block.buttonBorderRadius ?? 4,
+              padding: `${block.buttonPaddingY ?? 10}px ${block.buttonPaddingX ?? 20}px`,
               textDecoration: "none",
-              fontSize: 14,
-              fontWeight: 500,
+              cursor: "pointer",
             }}
           >
             {block.buttonLabel}
           </a>
         </div>
       );
+    }
 
     case "unsubscribe":
       return (
@@ -384,7 +441,9 @@ export default function BlockRenderer({ block }: Props) {
       const ta = block.align ?? "left";
       const initial = (block.authorName?.trim()?.[0] ?? "?").toUpperCase();
       return (
-        <div style={{ padding: "18px 24px", backgroundColor: bg, textAlign: ta }}>
+        <div
+          style={{ padding: "18px 24px", backgroundColor: bg, textAlign: ta }}
+        >
           <div
             style={{
               borderLeft: `4px solid ${accent}`,
@@ -408,7 +467,12 @@ export default function BlockRenderer({ block }: Props) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: ta === "center" ? "center" : ta === "right" ? "flex-end" : "flex-start",
+                justifyContent:
+                  ta === "center"
+                    ? "center"
+                    : ta === "right"
+                      ? "flex-end"
+                      : "flex-start",
                 gap: 12,
               }}
             >
@@ -443,11 +507,25 @@ export default function BlockRenderer({ block }: Props) {
                 </div>
               )}
               <div style={{ textAlign: "left" }}>
-                <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: authorC }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: authorC,
+                  }}
+                >
                   {block.authorName}
                 </p>
                 {block.authorTitle && (
-                  <p style={{ margin: "2px 0 0", fontSize: 13, color: fg, opacity: 0.8 }}>
+                  <p
+                    style={{
+                      margin: "2px 0 0",
+                      fontSize: 13,
+                      color: fg,
+                      opacity: 0.8,
+                    }}
+                  >
                     {block.authorTitle}
                   </p>
                 )}
@@ -488,7 +566,14 @@ export default function BlockRenderer({ block }: Props) {
               {block.code}
             </div>
             {block.description && (
-              <p style={{ margin: "10px 0 0", fontSize: 13, color: fg, opacity: 0.75 }}>
+              <p
+                style={{
+                  margin: "10px 0 0",
+                  fontSize: 13,
+                  color: fg,
+                  opacity: 0.75,
+                }}
+              >
                 {block.description}
               </p>
             )}
@@ -510,27 +595,47 @@ export default function BlockRenderer({ block }: Props) {
             {Array.from({ length: full }, (_, i) => (
               <span
                 key={`f-${i}`}
-                style={{ fontSize: size, color: sc, marginRight: 2, lineHeight: 1 }}
+                style={{
+                  fontSize: size,
+                  color: sc,
+                  marginRight: 2,
+                  lineHeight: 1,
+                }}
               >
                 ★
               </span>
             ))}
             {half ? (
-              <span style={{ fontSize: size, color: sc, opacity: 0.5, marginRight: 2, lineHeight: 1 }}>
+              <span
+                style={{
+                  fontSize: size,
+                  color: sc,
+                  opacity: 0.5,
+                  marginRight: 2,
+                  lineHeight: 1,
+                }}
+              >
                 ★
               </span>
             ) : null}
             {Array.from({ length: empty }, (_, i) => (
               <span
                 key={`e-${i}`}
-                style={{ fontSize: size, color: ec, marginRight: 2, lineHeight: 1 }}
+                style={{
+                  fontSize: size,
+                  color: ec,
+                  marginRight: 2,
+                  lineHeight: 1,
+                }}
               >
                 ★
               </span>
             ))}
           </div>
           {block.label && (
-            <p style={{ margin: "10px 0 0", fontSize: 13, color: "#64748b" }}>{block.label}</p>
+            <p style={{ margin: "10px 0 0", fontSize: 13, color: "#64748b" }}>
+              {block.label}
+            </p>
           )}
         </div>
       );
@@ -557,7 +662,14 @@ export default function BlockRenderer({ block }: Props) {
             alt={block.logoAlt}
             style={{ maxWidth: lw, height: "auto", display: "block" }}
           />
-          <nav style={{ display: "flex", flexWrap: "wrap", gap: 16, justifyContent: "flex-end" }}>
+          <nav
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 16,
+              justifyContent: "flex-end",
+            }}
+          >
             {block.links.map((l, i) => (
               <a
                 key={i}
@@ -641,7 +753,11 @@ export default function BlockRenderer({ block }: Props) {
               />
             );
             return logo.href?.trim() ? (
-              <a key={i} href={logo.href.trim()} style={{ textDecoration: "none", lineHeight: 0 }}>
+              <a
+                key={i}
+                href={logo.href.trim()}
+                style={{ textDecoration: "none", lineHeight: 0 }}
+              >
                 {img}
               </a>
             ) : (
@@ -660,13 +776,19 @@ export default function BlockRenderer({ block }: Props) {
 }
 
 function HeroBlockPreview({ block }: { block: HeroBlock }) {
-  const al = block.align;
+  const al = block.align ?? "center";
   const ta = al as CSSProperties["textAlign"];
+  const minH = block.minHeight ?? 300;
+  const bgImage = block.backgroundImage?.trim();
+  const tc = block.textColor ?? "#ffffff";
   return (
     <div
       style={{
-        minHeight: block.minHeight,
-        backgroundImage: `url(${block.backgroundImage})`,
+        minHeight: minH,
+        backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+        backgroundColor: bgImage
+          ? undefined
+          : (block.backgroundColor ?? "#1a1a1a"),
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -674,57 +796,67 @@ function HeroBlockPreview({ block }: { block: HeroBlock }) {
     >
       <div
         style={{
-          minHeight: block.minHeight,
-          backgroundColor: block.overlayColor,
+          minHeight: minH,
+          backgroundColor: block.overlayColor ?? "rgba(0,0,0,0)",
           padding: "40px 28px",
           textAlign: ta,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems:
-            al === "center" ? "center" : al === "right" ? "flex-end" : "flex-start",
+            al === "center"
+              ? "center"
+              : al === "right"
+                ? "flex-end"
+                : "flex-start",
           boxSizing: "border-box",
         }}
       >
-        <h1
-          style={{
-            margin: "0 0 12px",
-            fontSize: 28,
-            lineHeight: 1.2,
-            fontWeight: 700,
-            color: block.textColor,
-            maxWidth: 480,
-          }}
-        >
-          {block.title}
-        </h1>
-        <p
-          style={{
-            margin: "0 0 22px",
-            fontSize: 16,
-            lineHeight: 1.5,
-            color: block.textColor,
-            opacity: 0.95,
-            maxWidth: 480,
-          }}
-        >
-          {block.subtitle}
-        </p>
-        <a
-          href={block.buttonHref}
-          style={{
-            display: "inline-block",
-            backgroundColor: block.buttonBgColor,
-            color: block.buttonTextColor,
-            padding: "12px 26px",
-            borderRadius: 6,
-            textDecoration: "none",
-            fontSize: 14,
-            fontWeight: 600,
-          }}
-        >
-          {block.buttonLabel}
-        </a>
+        {block.title && (
+          <h1
+            style={{
+              margin: "0 0 12px",
+              fontSize: 28,
+              lineHeight: 1.2,
+              fontWeight: 700,
+              color: tc,
+              maxWidth: 480,
+            }}
+          >
+            {block.title}
+          </h1>
+        )}
+        {block.subtitle && (
+          <p
+            style={{
+              margin: "0 0 22px",
+              fontSize: 16,
+              lineHeight: 1.5,
+              color: tc,
+              opacity: 0.95,
+              maxWidth: 480,
+            }}
+          >
+            {block.subtitle}
+          </p>
+        )}
+        {block.buttonLabel && (
+          <a
+            href={block.buttonHref ?? "#"}
+            style={{
+              display: "inline-block",
+              backgroundColor: block.buttonBgColor ?? "#ffffff",
+              color: block.buttonTextColor ?? "#000000",
+              padding: "12px 26px",
+              borderRadius: 6,
+              textDecoration: "none",
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            {block.buttonLabel}
+          </a>
+        )}
       </div>
     </div>
   );

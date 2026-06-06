@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "dev:api": "ts-node --esm api-server.ts",
+    "dev:api": "tsx watch api-server.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:api\""
   },
   "dependencies": {
@@ -65,7 +65,7 @@
     "globals": "^17.5.0",
     "tailwindcss": "^4.2.4",
     "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10"
