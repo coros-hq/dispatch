@@ -1,6 +1,9 @@
 import { getActiveCanvas, useEditorStore } from "../../store/editor";
 import type { Block } from "../../types";
-import { datetimeLocalToIso, isoToDatetimeLocalValue } from "../../lib/block-helpers";
+import {
+  datetimeLocalToIso,
+  isoToDatetimeLocalValue,
+} from "../../lib/block-helpers";
 import {
   GOOGLE_FONT_PRESETS,
   SYSTEM_FONT_PRESETS,
@@ -91,7 +94,7 @@ export default function PropsPanel() {
             <SelectTrigger>
               <SelectValue placeholder="Font" />
             </SelectTrigger>
-            <SelectContent className="max-h-[280px]">
+            <SelectContent className="max-h-70">
               <p className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                 Google Fonts
               </p>
@@ -287,7 +290,10 @@ export default function PropsPanel() {
           Columns
         </p>
         {section.columns.map((col, i) => (
-          <div key={col.id} className="flex flex-col gap-2 border border-border rounded-lg p-2">
+          <div
+            key={col.id}
+            className="flex flex-col gap-2 border border-border rounded-lg p-2"
+          >
             <Field label={`Column ${i + 1} width %`}>
               <Input
                 type="number"
@@ -308,7 +314,10 @@ export default function PropsPanel() {
                 onValueChange={(v) => {
                   const columns = section.columns.map((c, ci) =>
                     ci === i
-                      ? { ...c, verticalAlign: v as "top" | "middle" | "bottom" }
+                      ? {
+                          ...c,
+                          verticalAlign: v as "top" | "middle" | "bottom",
+                        }
                       : c,
                   );
                   updateSection(section.id, { columns });
@@ -878,44 +887,185 @@ export default function PropsPanel() {
 
         {block.type === "product-card" && (
           <>
-            <Field label="Image">
+            {/* ── IMAGE ── */}
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
+              Image
+            </p>
+            <Field label="Source">
               <ImageUploader
                 value={block.image}
                 onChange={(url) => update({ image: url })}
               />
             </Field>
-            <Field label="Title">
+            <Field label="Aspect ratio">
+              <Select
+                value={block.imageAspectRatio ?? "16:9"}
+                onValueChange={(v) => update({ imageAspectRatio: v as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="16:9">16:9</SelectItem>
+                  <SelectItem value="4:3">4:3</SelectItem>
+                  <SelectItem value="3:2">3:2</SelectItem>
+                  <SelectItem value="1:1">1:1</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Corner radius">
+              <Input
+                type="number"
+                min={0}
+                max={48}
+                value={block.imageBorderRadius ?? 0}
+                onChange={(e) =>
+                  update({ imageBorderRadius: Number(e.target.value) })
+                }
+              />
+            </Field>
+
+            {/* ── TITLE ── */}
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
+              Title
+            </p>
+            <Field label="Text">
               <Input
                 value={block.title}
                 onChange={(e) => update({ title: e.target.value })}
               />
             </Field>
-            <Field label="Description">
+            <Field label="Font size">
+              <Input
+                type="number"
+                min={10}
+                max={64}
+                value={block.titleFontSize ?? 18}
+                onChange={(e) =>
+                  update({ titleFontSize: Number(e.target.value) })
+                }
+              />
+            </Field>
+            <Field label="Font weight">
+              <Select
+                value={block.titleFontWeight ?? "600"}
+                onValueChange={(v) => update({ titleFontWeight: v as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="400">Regular</SelectItem>
+                  <SelectItem value="500">Medium</SelectItem>
+                  <SelectItem value="600">Semibold</SelectItem>
+                  <SelectItem value="700">Bold</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.titleColor ?? "#111111"}
+                onChange={(e) => update({ titleColor: e.target.value })}
+              />
+            </Field>
+
+            {/* ── DESCRIPTION ── */}
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
+              Description
+            </p>
+            <Field label="Text">
               <Textarea
-                className="resize-none h-16"
+                className="resize-none h-20"
                 value={block.description}
                 onChange={(e) => update({ description: e.target.value })}
               />
             </Field>
-            <Field label="Price">
+            <Field label="Font size">
+              <Input
+                type="number"
+                min={10}
+                max={32}
+                value={block.descriptionFontSize ?? 14}
+                onChange={(e) =>
+                  update({ descriptionFontSize: Number(e.target.value) })
+                }
+              />
+            </Field>
+            <Field label="Color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.descriptionColor ?? "#555555"}
+                onChange={(e) => update({ descriptionColor: e.target.value })}
+              />
+            </Field>
+
+            {/* ── PRICE ── */}
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
+              Price
+            </p>
+            <Field label="Text">
               <Input
                 value={block.price}
                 onChange={(e) => update({ price: e.target.value })}
               />
             </Field>
-            <Field label="Button label">
+            <Field label="Font size">
+              <Input
+                type="number"
+                min={10}
+                max={48}
+                value={block.priceFontSize ?? 16}
+                onChange={(e) =>
+                  update({ priceFontSize: Number(e.target.value) })
+                }
+              />
+            </Field>
+            <Field label="Font weight">
+              <Select
+                value={block.priceFontWeight ?? "700"}
+                onValueChange={(v) => update({ priceFontWeight: v as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="400">Regular</SelectItem>
+                  <SelectItem value="500">Medium</SelectItem>
+                  <SelectItem value="600">Semibold</SelectItem>
+                  <SelectItem value="700">Bold</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.priceColor ?? "#111111"}
+                onChange={(e) => update({ priceColor: e.target.value })}
+              />
+            </Field>
+
+            {/* ── BUTTON ── */}
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
+              Button
+            </p>
+            <Field label="Label">
               <Input
                 value={block.buttonLabel}
                 onChange={(e) => update({ buttonLabel: e.target.value })}
               />
             </Field>
-            <Field label="Button URL">
+            <Field label="URL">
               <Input
+                placeholder="https://"
                 value={block.buttonHref}
                 onChange={(e) => update({ buttonHref: e.target.value })}
               />
             </Field>
-            <Field label="Button background">
+            <Field label="Background">
               <input
                 type="color"
                 className="w-full h-8 rounded cursor-pointer border border-border"
@@ -923,12 +1073,127 @@ export default function PropsPanel() {
                 onChange={(e) => update({ buttonBgColor: e.target.value })}
               />
             </Field>
-            <Field label="Button text color">
+            <Field label="Text color">
               <input
                 type="color"
                 className="w-full h-8 rounded cursor-pointer border border-border"
                 value={block.buttonTextColor}
                 onChange={(e) => update({ buttonTextColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Font size">
+              <Input
+                type="number"
+                min={10}
+                max={24}
+                value={block.buttonFontSize ?? 14}
+                onChange={(e) =>
+                  update({ buttonFontSize: Number(e.target.value) })
+                }
+              />
+            </Field>
+            <Field label="Corner radius">
+              <Input
+                type="number"
+                min={0}
+                max={999}
+                value={block.buttonBorderRadius ?? 4}
+                onChange={(e) =>
+                  update({ buttonBorderRadius: Number(e.target.value) })
+                }
+              />
+            </Field>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Padding X">
+                <Input
+                  type="number"
+                  min={0}
+                  max={80}
+                  value={block.buttonPaddingX ?? 20}
+                  onChange={(e) =>
+                    update({ buttonPaddingX: Number(e.target.value) })
+                  }
+                />
+              </Field>
+              <Field label="Padding Y">
+                <Input
+                  type="number"
+                  min={0}
+                  max={40}
+                  value={block.buttonPaddingY ?? 10}
+                  onChange={(e) =>
+                    update({ buttonPaddingY: Number(e.target.value) })
+                  }
+                />
+              </Field>
+            </div>
+
+            {/* ── CARD ── */}
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
+              Card
+            </p>
+            <Field label="Background">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.cardBgColor ?? "#ffffff"}
+                onChange={(e) => update({ cardBgColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Padding">
+              <Input
+                type="number"
+                min={0}
+                max={64}
+                value={block.cardPadding ?? 16}
+                onChange={(e) =>
+                  update({ cardPadding: Number(e.target.value) })
+                }
+              />
+            </Field>
+            <Field label="Align">
+              <Select
+                value={block.cardAlign ?? "left"}
+                onValueChange={(v) => update({ cardAlign: v as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Border color">
+              <input
+                type="color"
+                className="w-full h-8 rounded cursor-pointer border border-border"
+                value={block.cardBorderColor ?? "#e5e7eb"}
+                onChange={(e) => update({ cardBorderColor: e.target.value })}
+              />
+            </Field>
+            <Field label="Border width">
+              <Input
+                type="number"
+                min={0}
+                max={8}
+                value={block.cardBorderWidth ?? 0}
+                onChange={(e) =>
+                  update({ cardBorderWidth: Number(e.target.value) })
+                }
+              />
+            </Field>
+            <Field label="Corner radius">
+              <Input
+                type="number"
+                min={0}
+                max={32}
+                value={block.cardBorderRadius ?? 0}
+                onChange={(e) =>
+                  update({ cardBorderRadius: Number(e.target.value) })
+                }
               />
             </Field>
           </>
@@ -1095,7 +1360,7 @@ export default function PropsPanel() {
           <>
             <Field label="Quote">
               <Textarea
-                className="resize-none min-h-[100px]"
+                className="resize-none min-h-25"
                 value={block.quote}
                 onChange={(e) => update({ quote: e.target.value })}
               />
@@ -1192,7 +1457,9 @@ export default function PropsPanel() {
                 min={12}
                 max={40}
                 value={block.codeFontSize ?? 22}
-                onChange={(e) => update({ codeFontSize: Number(e.target.value) })}
+                onChange={(e) =>
+                  update({ codeFontSize: Number(e.target.value) })
+                }
               />
             </Field>
             <Field label="Align">
@@ -1431,9 +1698,7 @@ export default function PropsPanel() {
                 min={12}
                 max={120}
                 value={block.logoHeight}
-                onChange={(e) =>
-                  update({ logoHeight: Number(e.target.value) })
-                }
+                onChange={(e) => update({ logoHeight: Number(e.target.value) })}
               />
             </Field>
             <Field label="Gap (px)">
@@ -1528,7 +1793,7 @@ export default function PropsPanel() {
           <>
             <Field label="Background image">
               <ImageUploader
-                value={block.backgroundImage}
+                value={block.backgroundImage || ""}
                 onChange={(url) => update({ backgroundImage: url })}
               />
             </Field>
@@ -1609,9 +1874,7 @@ export default function PropsPanel() {
                 type="number"
                 min={120}
                 value={block.minHeight}
-                onChange={(e) =>
-                  update({ minHeight: Number(e.target.value) })
-                }
+                onChange={(e) => update({ minHeight: Number(e.target.value) })}
               />
             </Field>
           </>

@@ -25,6 +25,7 @@ const CAMPAIGN_API_ROUTES: Record<
   "/api/send-campaign": () => import("./api/send-campaign"),
   "/api/unsubscribe": () => import("./api/unsubscribe"),
   "/api/smtp-verify": () => import("./api/smtp-verify"),
+  "/api/assistant": () => import("./api/assistant"),
 };
 
 function inviteApiDevPlugin(env: Record<string, string>): Plugin {
@@ -54,6 +55,9 @@ function inviteApiDevPlugin(env: Record<string, string>): Plugin {
             process.env.GOOGLE_CLIENT_SECRET ??= env.GOOGLE_CLIENT_SECRET;
             process.env.MICROSOFT_CLIENT_ID ??= env.MICROSOFT_CLIENT_ID;
             process.env.MICROSOFT_CLIENT_SECRET ??= env.MICROSOFT_CLIENT_SECRET;
+            process.env.OLLAMA_URL ??= env.OLLAMA_URL;
+            process.env.OLLAMA_MODEL ??= env.OLLAMA_MODEL;
+            process.env.OLLAMA_SECRET ??= env.OLLAMA_SECRET;
 
             try {
               const mod = await campaignRoute();

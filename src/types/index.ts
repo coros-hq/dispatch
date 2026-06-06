@@ -164,14 +164,48 @@ export type SocialBlock = {
 export type ProductCardBlock = {
   id: string;
   type: "product-card";
+
+  // Image
   image: string;
+  imageAspectRatio?: "1:1" | "4:3" | "3:2" | "16:9";
+  imageBorderRadius?: number;
+
+  // Title
   title: string;
+  titleFontSize?: number;
+  titleFontWeight?: "400" | "500" | "600" | "700";
+  titleFontFamily?: string;
+  titleColor?: string;
+
+  // Description
   description: string;
+  descriptionFontSize?: number;
+  descriptionFontFamily?: string;
+  descriptionColor?: string;
+
+  // Price
   price: string;
+  priceFontSize?: number;
+  priceFontWeight?: "400" | "500" | "600" | "700";
+  priceColor?: string;
+
+  // Button
   buttonLabel: string;
   buttonHref: string;
   buttonBgColor: string;
   buttonTextColor: string;
+  buttonFontSize?: number;
+  buttonBorderRadius?: number;
+  buttonPaddingX?: number;
+  buttonPaddingY?: number;
+
+  // Card layout
+  cardPadding?: number;
+  cardBgColor?: string;
+  cardBorderColor?: string;
+  cardBorderWidth?: number;
+  cardBorderRadius?: number;
+  cardAlign?: "left" | "center" | "right";
 };
 
 export type UnsubscribeBlock = {
@@ -282,16 +316,17 @@ export type LogoStripBlock = {
 export type HeroBlock = {
   id: string;
   type: "hero";
-  backgroundImage: string;
-  title: string;
-  subtitle: string;
-  buttonLabel: string;
-  buttonHref: string;
-  buttonBgColor: string;
-  buttonTextColor: string;
+  backgroundImage?: string;
+  backgroundColor?: string;
+  title?: string;
+  subtitle?: string;
+  buttonLabel?: string;
+  buttonHref?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
   /** e.g. rgba(0,0,0,0.45) */
-  overlayColor: string;
-  textColor: string;
-  align: "left" | "center" | "right";
-  minHeight: number;
+  overlayColor?: string;
+  textColor?: string;
+  align?: "left" | "center" | "right";
+  minHeight?: number;
 };

@@ -22,6 +22,11 @@ export async function fetchUserPlan(): Promise<Plan> {
   return (data.plan as Plan) ?? "free";
 }
 
+// Returns "YYYY-MM-01" — first day of current month
+function currentMonthDate(): string {
+  return new Date().toISOString().slice(0, 7) + "-01";
+}
+
 export async function fetchUsage(): Promise<{
   testEmailsSent: number;
   campaignsSent: number;
@@ -30,16 +35,19 @@ export async function fetchUsage(): Promise<{
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { testEmailsSent: 0, campaignsSent: 0, contactsThisMonth: 0 };
+  if (!user)
+    return { testEmailsSent: 0, campaignsSent: 0, contactsThisMonth: 0 };
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
-
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("usage_tracking")
     .select("*")
     .eq("user_id", user.id)
-    .eq("usage_month", currentMonth)
-    .single();
+    .eq("usage_month", currentMonthDate())
+    .maybeSingle(); // use maybeSingle — returns null instead of 406 when no row exists
+
+  if (error) {
+    console.warn("[usage] fetchUsage error:", error.message, error.code);
+  }
 
   return {
     testEmailsSent: data?.test_emails_sent ?? 0,
@@ -57,12 +65,10 @@ export async function incrementUsage(
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
-
   await supabase.rpc("increment_usage", {
     p_user_id: user.id,
     p_field: field,
-    p_month: currentMonth,
+    p_month: currentMonthDate(),
     p_amount: amount,
   });
 }

@@ -1,11 +1,4 @@
-import type {
-  Block,
-  Canvas,
-  Column,
-  Page,
-  Section,
-  Template,
-} from "../types";
+import type { Block, Canvas, Column, Page, Section, Template } from "../types";
 import { getCountdownParts, starSegments } from "./block-helpers";
 import { getActiveCanvas } from "../store/editor";
 
@@ -121,7 +114,7 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
         `object-fit:${fit}`,
         `width:${block.width}px`,
       ].join(";");
-      const img = `<img src="${escapeHtmlAttr(block.src)}" alt="${escapeHtmlAttr(block.alt)}" width="${block.width}" style="${imgStyle}" />`;
+      const img = `<img src="${escapeHtmlAttr(block.src ?? "")}" alt="${escapeHtmlAttr(block.alt ?? "")}" width="${block.width}" style="${imgStyle}" />`;
       const inner = block.linkHref?.trim()
         ? `<a href="${escapeHtmlAttr(block.linkHref.trim())}" style="text-decoration:none;display:block;border:0;">${img}</a>`
         : img;
@@ -134,7 +127,7 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
     case "button":
       return `
   <tr><td align="${block.align ?? "center"}" style="padding:${block.paddingTop ?? 8}px ${block.paddingRight ?? 0}px ${block.paddingBottom ?? 8}px ${block.paddingLeft ?? 0}px;">
-    <a href="${block.href}" style="display:inline-block;background-color:${block.bgColor};color:${block.textColor};padding:10px 24px;border-radius:${block.borderRadius}px;text-decoration:none;font-size:14px;font-weight:500;${block.borderWidth ? `border:${block.borderWidth}px solid ${block.borderColor ?? block.bgColor};` : ""}">${block.label}</a>
+    <a href="${escapeHtmlAttr(block.href ?? "#")}" style="display:inline-block;background-color:${block.bgColor ?? "#000000"};color:${block.textColor ?? "#ffffff"};padding:10px 24px;border-radius:${block.borderRadius ?? 4}px;text-decoration:none;font-size:14px;font-weight:500;${block.borderWidth ? `border:${block.borderWidth}px solid ${block.borderColor ?? block.bgColor ?? "#000000"};` : ""}">${block.label ?? "Button"}</a>
   </td></tr>`;
     case "divider":
       return `
@@ -178,11 +171,11 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
       return `
   <tr>
     <td style="padding:16px 24px;">
-      ${block.image ? `<img src="${block.image}" alt="${block.title}" width="100%" style="display:block;max-width:100%;border-radius:8px;margin-bottom:12px;" />` : ""}
-      <p style="margin:0 0 4px;font-size:18px;font-weight:bold;color:#111111;">${block.title}</p>
-      <p style="margin:0 0 8px;font-size:14px;color:#555555;line-height:1.5;">${block.description}</p>
+      ${block.image ? `<img src="${escapeHtmlAttr(block.image)}" alt="${escapeHtmlAttr(block.title ?? "")}" width="100%" style="display:block;max-width:100%;border-radius:8px;margin-bottom:12px;" />` : ""}
+      <p style="margin:0 0 4px;font-size:18px;font-weight:bold;color:#111111;">${block.title ?? ""}</p>
+      <p style="margin:0 0 8px;font-size:14px;color:#555555;line-height:1.5;">${block.description ?? ""}</p>
       ${block.price ? `<p style="margin:0 0 12px;font-size:20px;font-weight:bold;color:#111111;">${block.price}</p>` : ""}
-      <a href="${block.buttonHref}" style="display:inline-block;background-color:${block.buttonBgColor};color:${block.buttonTextColor};padding:10px 24px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">${block.buttonLabel}</a>
+      <a href="${escapeHtmlAttr(block.buttonHref ?? "#")}" style="display:inline-block;background-color:${block.buttonBgColor ?? "#000000"};color:${block.buttonTextColor ?? "#ffffff"};padding:10px 24px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">${block.buttonLabel ?? "Shop Now"}</a>
     </td>
   </tr>`;
 
@@ -190,9 +183,9 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
       return `
   <tr>
     <td align="center" style="padding:16px 24px;">
-      <p style="margin:0 0 4px;font-size:${block.fontSize}px;color:${block.textColor};">${block.companyName}</p>
-      <p style="margin:0 0 8px;font-size:${block.fontSize}px;color:${block.textColor};">${block.address}</p>
-      <a href="${block.unsubscribeUrl}" style="font-size:${block.fontSize}px;color:${block.textColor};">Unsubscribe</a>
+      <p style="margin:0 0 4px;font-size:${block.fontSize ?? 12}px;color:${block.textColor ?? "#888888"};">${block.companyName ?? ""}</p>
+      <p style="margin:0 0 8px;font-size:${block.fontSize ?? 12}px;color:${block.textColor ?? "#888888"};">${block.address ?? ""}</p>
+      <a href="${escapeHtmlAttr(block.unsubscribeUrl ?? "#")}" style="font-size:${block.fontSize ?? 12}px;color:${block.textColor ?? "#888888"};">Unsubscribe</a>
     </td>
   </tr>`;
 
@@ -220,19 +213,15 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
       const lm = block.labelMinutes ?? "Minutes";
       const ls = block.labelSeconds ?? "Secs";
       const parts = getCountdownParts(block.targetDateIso);
-      const expiredMsg =
-        escapeHtmlAttr(block.expiredMessage ?? "This offer has ended");
+      const expiredMsg = escapeHtmlAttr(
+        block.expiredMessage ?? "This offer has ended",
+      );
       const headline = block.headline
         ? `<p style="margin:0 0 16px;font-size:13px;letter-spacing:0.06em;text-transform:uppercase;color:${fg};">${block.headline}</p>`
         : "";
       const isoAttr = escapeHtmlAttr(block.targetDateIso);
 
-      const cell = (
-        dc: string,
-        num: number,
-        label: string,
-        digitSize = 26,
-      ) => `
+      const cell = (dc: string, num: number, label: string, digitSize = 26) => `
               <td style="padding:0 6px;vertical-align:top;">
                 <table role="presentation" cellpadding="0" cellspacing="0" style="background-color:${ac};border-radius:10px;min-width:68px;">
                   <tr><td align="center" style="padding:12px 10px;">
@@ -286,9 +275,7 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
       return `
   <tr><td align="${ta}" style="padding:18px 24px;background-color:${bg};">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="${
-      ta === "center"
-        ? "margin:0 auto;max-width:480px;"
-        : ""
+      ta === "center" ? "margin:0 auto;max-width:480px;" : ""
     }">
       <tr>
         <td style="border-left:4px solid ${accent};padding-left:16px;">
@@ -449,7 +436,8 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
           return `<td style="padding:0 ${half}px;vertical-align:middle;">${inner}</td>`;
         })
         .join("");
-      const tableAlign = ta === "left" ? "left" : ta === "right" ? "right" : "center";
+      const tableAlign =
+        ta === "left" ? "left" : ta === "right" ? "right" : "center";
       const centerFix = ta === "center" ? "margin:0 auto;" : "";
       return `
   <tr><td style="background-color:${bg};padding:16px 12px;">
@@ -461,39 +449,50 @@ function renderBlock(block: Block, ctx: RenderCtx): string {
 
     case "hero": {
       const w = ctx.contentWidth;
-      const h = block.minHeight;
-      const bg = block.backgroundImage;
-      const bgAttr = escapeHtmlAttr(bg);
-      const bgCss = cssUrl(bg);
-      const overlay = block.overlayColor;
-      const tc = block.textColor;
-      const al = block.align;
-      const title = escapeHtmlText(block.title);
-      const subtitle = escapeHtmlText(block.subtitle);
-      const btnBg = block.buttonBgColor;
-      const btnTx = block.buttonTextColor;
-      const vmlOpen = `<!--[if gte mso 9]><v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:${w}px;height:${h}px;"><v:fill type="frame" src="${bgAttr}" color="#000000" /><v:textbox inset="0,0,0,0"><![endif]-->`;
-      const vmlClose = `<!--[if gte mso 9]></v:textbox></v:rect><![endif]-->`;
+      const h = block.minHeight ?? 300;
+      const bg = block.backgroundImage ?? "";
+      const bgAttr = bg ? escapeHtmlAttr(bg) : "";
+      const bgCss = bg ? cssUrl(bg) : "";
+      const bgStyle = bg
+        ? `url('${bgCss}') center/cover no-repeat #1a1a1a`
+        : (block.backgroundColor ?? "#1a1a1a");
+      const overlay = block.overlayColor ?? "rgba(0,0,0,0)";
+      const tc = block.textColor ?? "#ffffff";
+      const al = block.align ?? "center";
+      const title = escapeHtmlText(block.title ?? "");
+      const subtitle = escapeHtmlText(block.subtitle ?? "");
+      const btnBg = block.buttonBgColor ?? "#ffffff";
+      const btnTx = block.buttonTextColor ?? "#000000";
+      const btnHref = block.buttonHref ?? "#";
+      const btnLabel = escapeHtmlText(block.buttonLabel ?? "");
+      const backgroundAttr = bgAttr ? `background="${bgAttr}"` : "";
+      const vmlOpen = bg
+        ? `<!--[if gte mso 9]><v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:${w}px;height:${h}px;"><v:fill type="frame" src="${bgAttr}" color="#000000" /><v:textbox inset="0,0,0,0"><![endif]-->`
+        : "";
+      const vmlClose = bg
+        ? `<!--[if gte mso 9]></v:textbox></v:rect><![endif]-->`
+        : "";
+
       return `
-  <tr><td style="padding:0;">
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-      <tr>
-        <td align="center" valign="middle" background="${bgAttr}" width="100%" style="width:100%;background:url('${bgCss}') center/cover no-repeat #1a1a1a;min-height:${h}px;padding:0;">
-          ${vmlOpen}
-          <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-            <tr>
-              <td align="${al}" valign="middle" style="background-color:${overlay};min-height:${h}px;padding:40px 28px;">
-                <h1 style="margin:0 0 12px;font-size:28px;line-height:1.2;font-weight:700;color:${tc};font-family:inherit;">${title}</h1>
-                <p style="margin:0 0 22px;font-size:16px;line-height:1.5;color:${tc};font-family:inherit;opacity:0.95;">${subtitle}</p>
-                <a href="${escapeHtmlAttr(block.buttonHref)}" style="display:inline-block;background-color:${btnBg};color:${btnTx};padding:12px 26px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;font-family:inherit;">${escapeHtmlText(block.buttonLabel)}</a>
-              </td>
-            </tr>
-          </table>
-          ${vmlClose}
-        </td>
-      </tr>
-    </table>
-  </td></tr>`;
+<tr><td style="padding:0;">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center" valign="middle" ${backgroundAttr} width="100%" style="width:100%;background:${bgStyle};min-height:${h}px;padding:0;">
+        ${vmlOpen}
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td align="${al}" valign="middle" style="background-color:${overlay};min-height:${h}px;padding:40px 28px;">
+              ${title ? `<h1 style="margin:0 0 12px;font-size:28px;line-height:1.2;font-weight:700;color:${tc};font-family:inherit;">${title}</h1>` : ""}
+              ${subtitle ? `<p style="margin:0 0 22px;font-size:16px;line-height:1.5;color:${tc};font-family:inherit;opacity:0.95;">${subtitle}</p>` : ""}
+              ${btnLabel ? `<a href="${escapeHtmlAttr(btnHref)}" style="display:inline-block;background-color:${btnBg};color:${btnTx};padding:12px 26px;border-radius:6px;text-decoration:none;font-size:14px;font-weight:600;font-family:inherit;">${btnLabel}</a>` : ""}
+            </td>
+          </tr>
+        </table>
+        ${vmlClose}
+      </td>
+    </tr>
+  </table>
+</td></tr>`;
     }
 
     default:
