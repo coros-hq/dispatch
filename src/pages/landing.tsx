@@ -5,7 +5,7 @@ import { Features } from "@/components/landing/Features";
 import { Templates } from "@/components/landing/Templates";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { OpenSource } from "@/components/landing/OpenSource";
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 
 export function Index() {
   return (
