@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getSupabaseAdmin } from "./lib/supabase-admin";
+import { getSupabaseAdmin } from "./lib/supabase-admin.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -17,10 +17,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const admin = getSupabaseAdmin();
-  await admin.from("unsubscribes").upsert(
-    { email: decodedEmail, unsubscribed_at: new Date().toISOString() },
-    { onConflict: "email" },
-  );
+  await admin
+    .from("unsubscribes")
+    .upsert(
+      { email: decodedEmail, unsubscribed_at: new Date().toISOString() },
+      { onConflict: "email" },
+    );
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   return res.status(200).send(

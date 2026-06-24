@@ -4,10 +4,10 @@ import {
   getEncryptionKey,
   getAppUrl,
   verifyUser,
-} from "./supabase-admin";
-import { personalizeContent, type CampaignRecipient } from "./personalize";
-import { refreshGmailToken, refreshOutlookToken } from "./token-refresh";
-import { sendViaGmail, sendViaOutlook } from "./send-email";
+} from "./supabase-admin.js";
+import { personalizeContent, type CampaignRecipient } from "./personalize.js";
+import { refreshGmailToken, refreshOutlookToken } from "./token-refresh.js";
+import { sendViaGmail, sendViaOutlook } from "./send-email.js";
 
 const BATCH_SIZE = 50;
 const BATCH_DELAY_MS = 100;
@@ -36,9 +36,7 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function ensureFreshToken(
-  account: ConnectedAccount,
-): Promise<string> {
+async function ensureFreshToken(account: ConnectedAccount): Promise<string> {
   const expiresAt = account.token_expires_at
     ? new Date(account.token_expires_at)
     : null;
@@ -83,7 +81,13 @@ export async function handleSendCampaign(
   const body = req.body as SendCampaignBody;
   const { accountId, subject, fromName, canvasHtml, recipients } = body;
 
-  if (!accountId || !subject || !fromName || !canvasHtml || !recipients?.length) {
+  if (
+    !accountId ||
+    !subject ||
+    !fromName ||
+    !canvasHtml ||
+    !recipients?.length
+  ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 

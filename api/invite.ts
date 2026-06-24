@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import {
   buildInviteEmailPayload,
   type InviteEmailParams,
-} from "./lib/build-invite-email";
+} from "./lib/build-invite-email.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
