@@ -7,7 +7,7 @@ import type {
   ChatMessage,
   CanvasSnapshot,
   AssistantRequest,
-} from "../src/types/assistant";
+} from "../src/types/assistant.js";
 
 function parseActions(raw: string): {
   reply: string;
@@ -44,7 +44,10 @@ function parseActions(raw: string): {
       }
     }
     if (!parsedAny) {
-      console.warn("[assistant] Skipping unparseable action fence:", fenceContent.slice(0, 120));
+      console.warn(
+        "[assistant] Skipping unparseable action fence:",
+        fenceContent.slice(0, 120),
+      );
     }
   }
   const reply = raw
@@ -178,7 +181,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(502).json({ error: "Model unavailable", detail });
     }
 
-    const data = await ollamaRes.json() as { message?: { content?: string } };
+    const data = (await ollamaRes.json()) as { message?: { content?: string } };
     const rawContent: string = data?.message?.content ?? "";
     console.log("[assistant] raw response:", rawContent);
 

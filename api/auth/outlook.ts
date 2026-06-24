@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { encodeOAuthState, getAppUrl } from "../lib/supabase-admin";
+import { encodeOAuthState, getAppUrl } from "../lib/supabase-admin.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
