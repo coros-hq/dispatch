@@ -1,6 +1,6 @@
 // api/assistant.ts
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { MAILSHOT_KNOWLEDGE } from "../src/lib/assistant-knowledge/index";
+import { MAILSHOT_KNOWLEDGE } from "../src/lib/assistant-knowledge/index.js";
 import type {
   AssistantAction,
   AssistantResponse,

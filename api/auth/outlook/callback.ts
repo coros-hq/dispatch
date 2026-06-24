@@ -4,7 +4,7 @@ import {
   getAppUrl,
   getEncryptionKey,
   getSupabaseAdmin,
-} from "../../lib/supabase-admin";
+} from "../../lib/supabase-admin.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -16,7 +16,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const oauthError = req.query.error as string | undefined;
 
   if (oauthError) {
-    return res.redirect(302, `/dashboard?error=${encodeURIComponent(oauthError)}`);
+    return res.redirect(
+      302,
+      `/dashboard?error=${encodeURIComponent(oauthError)}`,
+    );
   }
 
   if (!code || !stateRaw) {
