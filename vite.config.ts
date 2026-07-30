@@ -6,8 +6,8 @@ import type { IncomingMessage, ServerResponse } from "http";
 import {
   buildInviteEmailPayload,
   type InviteEmailParams,
-} from "./api/lib/build-invite-email";
-import { adaptVercelHandler, readJsonBody } from "./api/lib/dev-adapter";
+} from "./server/build-invite-email";
+import { adaptVercelHandler, readJsonBody } from "./server/dev-adapter";
 
 const CAMPAIGN_API_ROUTES: Record<
   string,

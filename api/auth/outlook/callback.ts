@@ -4,7 +4,7 @@ import {
   getAppUrl,
   getEncryptionKey,
   getSupabaseAdmin,
-} from "../../lib/supabase-admin.js";
+} from "../../../server/supabase-admin.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
