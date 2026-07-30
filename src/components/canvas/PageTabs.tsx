@@ -41,7 +41,7 @@ export default function PageTabs() {
   return (
     <div
       data-tour="page-tabs"
-      className="h-9 border-t border-border bg-muted/50 flex items-center px-2 gap-1 overflow-x-auto shrink-0"
+      className="h-9 border-t border-border bg-card flex items-center px-2 gap-1 overflow-x-auto shrink-0"
     >
       <span className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest px-1.5 shrink-0">
         Pages
@@ -51,10 +51,10 @@ export default function PageTabs() {
           key={page.id}
           onClick={() => setActivePage(page.id)}
           onDoubleClick={() => handleDoubleClick(page.id, page.name)}
-          className={`flex items-center gap-1.5 px-2.5 h-7 rounded-md text-xs cursor-pointer shrink-0 group transition-colors ${
+          className={`flex items-center gap-1.5 px-2.5 h-7 rounded-md text-xs cursor-pointer shrink-0 group transition-colors border ${
             page.id === activePageId
-              ? "bg-card border border-border text-foreground font-medium shadow-sm"
-              : "text-muted-foreground hover:bg-card/80 hover:text-foreground border border-transparent"
+              ? "bg-clay/10 border-clay/30 text-foreground font-medium"
+              : "border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground"
           }`}
         >
           {renamingId === page.id ? (
@@ -68,7 +68,7 @@ export default function PageTabs() {
                 if (e.key === "Escape") setRenamingId(null);
               }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-transparent outline-none border-b border-primary w-20 text-xs"
+              className="bg-transparent outline-none border-b border-clay w-20 text-xs"
             />
           ) : (
             <span>{page.name}</span>
@@ -111,7 +111,7 @@ export default function PageTabs() {
         ) : (
           <button
             onClick={addPage}
-            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground transition-colors shrink-0 cursor-pointer border border-dashed border-border/80"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shrink-0 cursor-pointer border border-dashed border-border/80"
             title="Add page"
           >
             <PlusIcon className="w-3.5 h-3.5" />

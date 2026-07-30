@@ -49,10 +49,11 @@ export default function App() {
           {/* Left — block palette */}
           <ResizablePanel defaultSize={350} minSize={200} maxSize={350}>
             <aside
-              className="h-full bg-card overflow-y-auto"
+              className="relative h-full bg-card overflow-y-auto"
               data-tour="right-panel"
             >
               <BlockPanel />
+              <div className="pointer-events-none sticky bottom-0 left-0 right-0 h-8 -mt-8 bg-gradient-to-t from-card to-transparent" />
             </aside>
           </ResizablePanel>
 
@@ -88,9 +89,9 @@ export default function App() {
                     <TabsTrigger value="code" className="text-xs">
                       Code
                     </TabsTrigger>
-                    {/* <TabsTrigger value="compatibility" className="text-xs">
+                     <TabsTrigger value="compatibility" className="text-xs">
                       Compatibility
-                    </TabsTrigger> */}
+                    </TabsTrigger>
                   </TabsList>
                   <TabsContent
                     value="props"

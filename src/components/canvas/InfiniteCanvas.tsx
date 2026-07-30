@@ -5,7 +5,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SectionRow from "./SectionRow";
-import { PlusIcon, Maximize2Icon } from "lucide-react";
+import { PlusIcon, Maximize2Icon, MinusIcon } from "lucide-react";
 
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 2;
@@ -127,6 +127,15 @@ export default function InfiniteCanvas() {
       onClick={() => select({ type: "none" })}
       data-tour="infinite-canvas"
     >
+      {/* Subtle workspace depth */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(120% 100% at 50% 0%, rgb(0 0 0 / 0) 0%, rgb(0 0 0 / 0.12) 100%)",
+        }}
+      />
+
       {/* Dot grid background */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -158,39 +167,41 @@ export default function InfiniteCanvas() {
       </div>
 
       {/* Controls */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-card border border-border rounded-lg px-2 py-1.5 shadow-[var(--shadow-lg)]">
         <button
           onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
-          className="text-muted-foreground hover:text-foreground text-sm w-6 h-6 flex items-center justify-center cursor-pointer"
+          className="text-muted-foreground hover:text-foreground w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-[transform,background-color,color] active:scale-[0.96] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
         >
-          −
+          <MinusIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
         </button>
-        <span className="text-xs text-muted-foreground w-12 text-center">
+        <span className="font-mono text-[10px] tabular-nums text-muted-foreground w-11 text-center">
           {Math.round(zoom * 100)}%
         </span>
         <button
           onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
-          className="text-muted-foreground hover:text-foreground text-sm w-6 h-6 flex items-center justify-center cursor-pointer"
+          className="text-muted-foreground hover:text-foreground w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-[transform,background-color,color] active:scale-[0.96] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
         >
-          +
+          <PlusIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
         </button>
         <div className="w-px h-4 bg-border mx-1" />
         <button
           onClick={handleFit}
-          className="text-muted-foreground hover:text-foreground cursor-pointer"
+          className="text-muted-foreground hover:text-foreground w-6 h-6 rounded-md flex items-center justify-center cursor-pointer transition-[transform,background-color,color] active:scale-[0.96] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
         >
-          <Maximize2Icon className="w-3.5 h-3.5" />
+          <Maximize2Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
         </button>
-        <div className="w-px h-4 bg-border mx-1" />
         {!readOnly && (
-          <button
-            onClick={addCanvas}
-            className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1 text-xs"
-            data-tour="add-canvas"
-          >
-            <PlusIcon className="w-3.5 h-3.5" />
-            Add variant
-          </button>
+          <>
+            <div className="w-px h-4 bg-border mx-1" />
+            <button
+              onClick={addCanvas}
+              className="text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1 text-xs h-6 px-2 rounded-md transition-[transform,background-color,color] active:scale-[0.96] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
+              data-tour="add-canvas"
+            >
+              <PlusIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
+              Add variant
+            </button>
+          </>
         )}
       </div>
 
@@ -237,8 +248,8 @@ function CanvasFrame({
     >
       {/* Canvas label */}
       <div
-        className={`absolute -top-7 left-0 text-xs font-medium transition-colors ${
-          isActive ? "text-primary" : "text-muted-foreground"
+        className={`absolute -top-7 left-0 text-xs font-medium tracking-wide transition-colors ${
+          isActive ? "text-clay" : "text-muted-foreground"
         }`}
       >
         {canvas.name}
@@ -246,8 +257,8 @@ function CanvasFrame({
 
       {/* Canvas frame */}
       <div
-        className={`rounded-xl overflow-hidden shadow-2xl transition-all ${
-          isActive ? "ring-2 ring-primary" : "ring-1 ring-border"
+        className={`rounded-xl overflow-hidden shadow-[0_2px_4px_-1px_rgba(0,0,0,0.3),0_32px_64px_-16px_rgba(0,0,0,0.6)] transition-shadow ${
+          isActive ? "ring-2 ring-clay" : "ring-1 ring-white/10"
         } ${isPreview ? "pointer-events-none" : ""}`}
         style={{
           backgroundColor: canvas.globalStyles.bgColor,

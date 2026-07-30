@@ -15,6 +15,7 @@ import { useNavigate } from "react-router";
 import { signOut } from "@/lib/auth";
 import {
   ArrowLeftIcon,
+  CheckIcon,
   LogOutIcon,
   Redo2Icon,
   Undo2Icon,
@@ -102,35 +103,37 @@ export default function Toolbar() {
   return (
     <header className="h-12 bg-card flex items-center justify-between px-4 shrink-0">
       {/* Left */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate("/dashboard")}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground transition-[transform,color] active:scale-[0.96]"
         >
-          <ArrowLeftIcon className="w-4 h-4" />
+          <ArrowLeftIcon className="w-4 h-4" strokeWidth={1.75} />
         </Button>
         <Separator orientation="vertical" className="h-4" />
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => undo()}
-          disabled={!canEdit || pastStates.length === 0}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Undo2Icon className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => redo()}
-          disabled={!canEdit || futureStates.length === 0}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <Redo2Icon className="w-4 h-4" />
-        </Button>
-        {currentProjectId && <VersionHistoryModal />}
+        <div className="flex items-center gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => undo()}
+            disabled={!canEdit || pastStates.length === 0}
+            className="text-muted-foreground hover:text-foreground transition-[transform,color] active:scale-[0.96] disabled:active:scale-100"
+          >
+            <Undo2Icon className="w-4 h-4" strokeWidth={1.75} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => redo()}
+            disabled={!canEdit || futureStates.length === 0}
+            className="text-muted-foreground hover:text-foreground transition-[transform,color] active:scale-[0.96] disabled:active:scale-100"
+          >
+            <Redo2Icon className="w-4 h-4" strokeWidth={1.75} />
+          </Button>
+          {currentProjectId && <VersionHistoryModal />}
+        </div>
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <img src={Logo} alt="MailShot Logo" className="w-6 h-6" />
@@ -142,32 +145,35 @@ export default function Toolbar() {
           />
         </div>
         {saveStatus === "saving" && (
-          <span className="text-[10px] text-muted-foreground animate-pulse">
-            Saving...
+          <span className="font-mono text-[10px] tabular-nums text-muted-foreground animate-pulse">
+            saving…
           </span>
         )}
         {saveStatus === "saved" && (
-          <span className="text-[10px] text-muted-foreground">✓ Saved</span>
+          <span className="flex items-center gap-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+            <CheckIcon className="w-3 h-3" strokeWidth={1.75} />
+            saved
+          </span>
         )}
       </div>
 
       {/* Center */}
-      <div className="flex items-center gap-1 border border-border rounded-md p-0.5">
+      <div className="flex items-center gap-0.5 border border-border rounded-lg p-0.5">
         <Button
           variant={previewWidth === "desktop" ? "secondary" : "ghost"}
           size="sm"
-          className="h-7 px-2"
+          className="h-7 px-2 rounded-md transition-[transform,background-color,color] active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           onClick={() => setPreviewWidth("desktop")}
         >
-          <MonitorIcon className="w-3.5 h-3.5" />
+          <MonitorIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
         </Button>
         <Button
           variant={previewWidth === "mobile" ? "secondary" : "ghost"}
           size="sm"
-          className="h-7 px-2"
+          className="h-7 px-2 rounded-md transition-[transform,background-color,color] active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           onClick={() => setPreviewWidth("mobile")}
         >
-          <SmartphoneIcon className="w-3.5 h-3.5" />
+          <SmartphoneIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
         </Button>
       </div>
 
@@ -178,9 +184,9 @@ export default function Toolbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground transition-[transform,color] active:scale-[0.96]"
             >
-              <MoreHorizontalIcon className="w-4 h-4" />
+              <MoreHorizontalIcon className="w-4 h-4" strokeWidth={1.75} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
@@ -223,9 +229,12 @@ export default function Toolbar() {
           </DropdownMenuContent>
         </DropdownMenu>
         <Button
-          variant={mode === "preview" ? "default" : "outline"}
+          variant={mode === "preview" ? "secondary" : "ghost"}
           size="sm"
           onClick={handleTemplates}
+          className={
+            mode === "preview" ? "" : "text-muted-foreground hover:text-foreground"
+          }
         >
           <LayoutTemplateIcon className="w-3.5 h-3.5 mr-2" />
           Templates
@@ -233,6 +242,9 @@ export default function Toolbar() {
 
         <EmailPreviewModal />
         <SendTestModal />
+
+        <Separator orientation="vertical" className="h-4" />
+
         {canEdit && <CampaignModal />}
         {canEdit && (
           <span data-tour="toolbar-save">

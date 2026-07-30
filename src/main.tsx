@@ -46,11 +46,11 @@ createRoot(root).render(
         </Route>
 
         {/* Protected routes */}
+        <Route path="/editor" element={<App />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/teams/:slug/settings" element={<TeamSettings />} />
-          <Route path="/editor" element={<App />} />
           <Route path="/editor/:id" element={<App />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>

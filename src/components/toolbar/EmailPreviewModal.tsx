@@ -8,6 +8,7 @@ import {
   SmartphoneIcon,
   XIcon,
   CodeIcon,
+  EyeIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,12 +36,13 @@ export default function EmailPreviewModal() {
   return (
     <>
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={() => setOpen(true)}
         disabled={!activePage}
-        className="gap-1.5"
+        className="gap-1.5 text-muted-foreground hover:text-foreground"
       >
+        <EyeIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
         Preview email
       </Button>
 

@@ -1,15 +1,23 @@
 import type { SavedTemplate } from "@/lib/template-service";
-import { GlobeIcon, LockIcon, Trash2Icon } from "lucide-react";
+import { MoreHorizontalIcon, PencilIcon, CopyIcon, Trash2Icon } from "lucide-react";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { useState, useRef } from "react";
-import { migrateTemplate, renameTemplate } from "@/lib/template-service";
+import { migrateTemplate, renameTemplate, saveTemplate } from "@/lib/template-service";
 import { toast } from "sonner";
 import { getActiveCanvas } from "@/store/editor";
+import { timeAgo } from "@/lib/time";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type ProjectCardProps = {
   project: SavedTemplate;
   onClick: () => void;
   onDelete?: () => void;
+  onDuplicated?: (project: SavedTemplate) => void;
   canRename?: boolean;
 };
 
@@ -17,20 +25,28 @@ export function ProjectCard({
   project,
   onClick,
   onDelete,
+  onDuplicated,
   canRename = true,
 }: ProjectCardProps) {
   const template = migrateTemplate(project.data);
   const activeCanvas = getActiveCanvas(template);
+  const canvasCount = template.pages.reduce(
+    (sum, page) => sum + page.canvases.length,
+    0,
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [name, setName] = useState(project.name);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleRenameClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const startRename = () => {
     if (!canRename) return;
     setIsRenaming(true);
-    setTimeout(() => inputRef.current?.focus(), 0);
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
   };
 
   const handleRenameSubmit = async () => {
@@ -48,15 +64,44 @@ export function ProjectCard({
     }
   };
 
+  const handleDuplicate = async () => {
+    if (isDuplicating) return;
+    setIsDuplicating(true);
+    try {
+      const copy = await saveTemplate(
+        { ...template, name: `${project.name} copy` },
+        project.is_public,
+        project.category,
+        project.team_id,
+      );
+      toast.success("Project duplicated");
+      onDuplicated?.(copy);
+    } catch (err: unknown) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to duplicate project",
+      );
+    } finally {
+      setIsDuplicating(false);
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="h-48 rounded-xl border border-secondary bg-card hover:border-primary/50 hover:bg-accent transition-all cursor-pointer group flex flex-col overflow-hidden"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="rounded-xl border border-border bg-card hover:border-clay/50 motion-safe:hover:-translate-y-0.5 transition-[transform,border-color] duration-200 cursor-pointer group flex flex-col overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
-      {/* Preview area */}
-      <div className="flex-1 bg-muted flex items-center justify-center p-4 overflow-hidden">
+      {/* Preview strip */}
+      <div className="relative h-[110px] bg-muted/60 overflow-hidden shrink-0">
         <div
-          className="w-full rounded scale-[0.6] origin-top"
+          className="w-full h-full flex flex-col"
           style={{ backgroundColor: activeCanvas.globalStyles.bgColor }}
         >
           {activeCanvas.sections.slice(0, 2).map((section) => (
@@ -64,21 +109,22 @@ export function ProjectCard({
               key={section.id}
               style={{
                 backgroundColor: section.bgColor,
-                padding: `${section.paddingTop}px ${section.paddingRight}px ${section.paddingBottom}px ${section.paddingLeft}px`,
+                padding: `${section.paddingTop * 0.4}px ${section.paddingRight * 0.4}px ${section.paddingBottom * 0.4}px ${section.paddingLeft * 0.4}px`,
               }}
               className="w-full"
             >
               {section.columns[0]?.blocks.slice(0, 2).map((block) => (
-                <div key={block.id} className="mb-1">
+                <div key={block.id} className="mb-1 overflow-hidden">
                   {block.type === "text" && (
                     <p
                       style={{
-                        fontSize: block.fontSize * 0.5,
+                        fontSize: Math.max(block.fontSize * 0.4, 6),
                         color: block.color,
                         textAlign: block.align,
                       }}
+                      className="leading-tight"
                     >
-                      {block.content.slice(0, 40)}
+                      {block.content.slice(0, 60)}
                     </p>
                   )}
                   {block.type === "button" && (
@@ -87,23 +133,27 @@ export function ProjectCard({
                         backgroundColor: block.bgColor,
                         color: block.textColor,
                       }}
-                      className="text-[6px] px-2 py-1 rounded inline-block"
+                      className="text-[6px] px-1.5 py-0.5 rounded inline-block"
                     >
                       {block.label}
                     </div>
                   )}
                   {block.type === "image" && (
-                    <div className="w-full h-8 bg-muted rounded" />
+                    <div className="w-full h-6 bg-black/10 rounded-sm" />
                   )}
                 </div>
               ))}
             </div>
           ))}
         </div>
+
+        <span className="absolute top-2 right-2 text-[10px] font-medium leading-none text-foreground/90 bg-background/80 backdrop-blur-sm px-1.5 py-1 rounded-md">
+          {canvasCount} {canvasCount === 1 ? "canvas" : "canvases"}
+        </span>
       </div>
 
-      {/* Footer */}
-      <div className="px-3 py-2.5 border-t border-border flex items-center justify-between shrink-0">
+      {/* Body */}
+      <div className="relative px-3.5 py-3 border-t border-border flex items-start justify-between gap-2">
         <div className="flex flex-col gap-0.5 min-w-0 flex-1">
           {isRenaming ? (
             <input
@@ -119,47 +169,61 @@ export function ProjectCard({
                 }
               }}
               onClick={(e) => e.stopPropagation()}
-              className="text-xs font-medium text-foreground bg-transparent border-b border-primary outline-none w-full"
+              className="text-sm font-medium text-foreground bg-transparent border-b border-clay outline-none w-full"
             />
           ) : (
-            <p
-              onClick={handleRenameClick}
-              className="text-xs font-medium text-foreground truncate hover:text-primary transition-colors"
-            >
+            <p className="text-sm font-medium text-foreground truncate">
               {name}
             </p>
           )}
-          <div className="flex items-center gap-1 flex-wrap">
-            {project.is_public ? (
-              <GlobeIcon className="w-3 h-3 text-muted-foreground" />
-            ) : (
-              <LockIcon className="w-3 h-3 text-muted-foreground" />
-            )}
-            <p className="text-[10px] text-muted-foreground">
-              {template.pages.length}{" "}
-              {template.pages.length === 1 ? "page" : "pages"}
-              <span className="text-muted-foreground/60"> · </span>
-              {new Date(project.updated_at).toLocaleDateString()}
-            </p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            Edited {timeAgo(project.updated_at)}
+          </p>
         </div>
+
+        {(canRename || onDelete) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                onClick={(e) => e.stopPropagation()}
+                aria-label="Project options"
+                className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-accent hover:text-foreground transition-[opacity,background-color,color] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
+              >
+                <MoreHorizontalIcon className="w-4 h-4" strokeWidth={1.75} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              {canRename && (
+                <DropdownMenuItem onClick={startRename}>
+                  <PencilIcon className="w-3.5 h-3.5 mr-2" />
+                  Rename
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={handleDuplicate} disabled={isDuplicating}>
+                <CopyIcon className="w-3.5 h-3.5 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              {onDelete && (
+                <DropdownMenuItem
+                  onClick={() => setIsDialogOpen(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2Icon className="w-3.5 h-3.5 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
         {onDelete && (
           <ConfirmationDialog
             isOpen={isDialogOpen}
             onClose={() => setIsDialogOpen(false)}
-            title="Delete Project"
+            title="Delete project"
             description="Are you sure you want to delete this project? This action cannot be undone."
-            trigger={
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDialogOpen(true);
-                }}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive cursor-pointer ml-2 shrink-0"
-              >
-                <Trash2Icon className="w-3.5 h-3.5" />
-              </button>
-            }
+            trigger={<span className="hidden" />}
             actionText="Delete"
             onAction={() => onDelete()}
           />

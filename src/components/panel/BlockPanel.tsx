@@ -316,7 +316,7 @@ const SECTIONS: {
 
 function PaletteIcon({ icon: Icon }: { icon: LucideIcon }) {
   return (
-    <span className="w-8 h-8 flex items-center justify-center rounded-md bg-muted shrink-0 text-muted-foreground group-hover:text-foreground transition-colors">
+    <span className="w-8 h-8 flex items-center justify-center rounded-md bg-muted shrink-0 text-foreground/80 transition-colors group-hover:text-foreground group-focus-visible:text-foreground">
       <Icon className={ICON_CLASS} strokeWidth={ICON_STROKE} aria-hidden />
     </span>
   );
@@ -333,13 +333,14 @@ function DraggablePaletteItem({ block }: { block: BlockPaletteItem }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
+      tabIndex={0}
       title={block.description}
-      className={`group flex flex-col border border-border items-center gap-1.5 p-2 rounded-lg hover:bg-accent transition-colors cursor-grab active:cursor-grabbing text-center ${
+      className={`group flex flex-col border border-border items-center gap-1.5 p-2 rounded-lg hover:bg-accent hover:border-accent transition-[transform,background-color,border-color] active:scale-[0.96] cursor-grab active:cursor-grabbing text-center outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card ${
         isDragging ? "opacity-40" : ""
       }`}
     >
       <PaletteIcon icon={block.icon} />
-      <p className="text-[10px] text-muted-foreground leading-tight w-full truncate">
+      <p className="text-[10px] text-foreground leading-tight w-full truncate">
         {block.label}
       </p>
     </div>
@@ -366,10 +367,13 @@ export default function BlockPanel() {
               type="button"
               onClick={() => addSection(s.columns)}
               title={s.label}
-              className="group flex flex-col border border-border items-center gap-1.5 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+              className="group relative flex flex-col border border-border items-center gap-1.5 p-2 rounded-lg hover:bg-accent hover:border-accent transition-[transform,background-color,border-color] active:scale-[0.96] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-card"
             >
+              <span className="absolute top-1 right-1 font-mono text-[9px] tabular-nums text-muted-foreground/70">
+                {s.columns}
+              </span>
               <PaletteIcon icon={s.icon} />
-              <p className="text-[10px] text-muted-foreground leading-tight truncate w-full text-center">
+              <p className="text-[10px] text-foreground leading-tight truncate w-full text-center">
                 {s.label}
               </p>
             </button>

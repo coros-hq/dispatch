@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { PlusIcon, LogOutIcon, UserIcon, ZapIcon } from "lucide-react";
+import {
+  PlusIcon,
+  LogOutIcon,
+  UserIcon,
+  ZapIcon,
+  FolderIcon,
+  SendIcon,
+  LayoutTemplateIcon,
+  UsersIcon,
+  SearchIcon,
+  ChevronsUpDownIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   fetchTemplates,
   deleteTemplate,
@@ -19,13 +29,7 @@ import type { Template } from "@/types";
 import { GOOGLE_FONT_PRESETS } from "@/lib/google-fonts";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { WorkspaceSwitcher } from "@/components/team/WorkspaceSwitcher";
 import {
   fetchTeamMembers,
@@ -38,8 +42,111 @@ import { PLAN_LIMITS } from "@/lib/planLimits";
 import { usePlanStore } from "@/store/plan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { UpgradePrompt } from "@/components/ui/UpgradePrompt";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { CampaignsTab } from "@/components/dashboard/CampaignsTab";
+import type { LucideIcon } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+type DashboardSection = "projects" | "campaigns";
+
+function SidebarNavItem({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  active?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar ${
+        active
+          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+          : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+      }`}
+    >
+      <Icon
+        className={`w-4 h-4 shrink-0 ${active ? "text-clay" : ""}`}
+        strokeWidth={1.75}
+      />
+      {label}
+    </button>
+  );
+}
+
+function initialsFor(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function NewProjectCard({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-xl border border-dashed border-border hover:border-clay/50 hover:bg-accent/40 transition-colors flex flex-col items-center justify-center gap-2 min-h-[200px] text-muted-foreground hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      <LayoutTemplateIcon className="w-5 h-5" strokeWidth={1.75} />
+      <span className="text-sm font-medium">Start from a template</span>
+    </button>
+  );
+}
+
+function ProjectCardSkeleton() {
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden flex flex-col">
+      <Skeleton className="h-[110px] w-full rounded-none" />
+      <div className="px-3.5 py-3 border-t border-border flex flex-col gap-2">
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-3 w-1/3" />
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({
+  headline,
+  body,
+  canEdit,
+  onNew,
+}: {
+  headline: string;
+  body: string;
+  canEdit: boolean;
+  onNew: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 gap-4 border border-dashed border-border rounded-xl mt-2">
+      <div className="text-center max-w-sm">
+        <p className="text-lg font-medium text-foreground">{headline}</p>
+        <p className="text-sm text-muted-foreground mt-1.5">{body}</p>
+      </div>
+      {canEdit && (
+        <Button
+          onClick={onNew}
+          className="bg-clay hover:bg-clay/90 text-clay-foreground"
+        >
+          <PlusIcon className="w-4 h-4 mr-2" />
+          New project
+        </Button>
+      )}
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -52,9 +159,9 @@ export default function Dashboard() {
   const [projects, setProjects] = useState<SavedTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"updated" | "created" | "name">("updated");
   const [memberCount, setMemberCount] = useState<number | undefined>();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [section, setSection] = useState<DashboardSection>("projects");
   const { plan } = usePlanStore();
   const limits = PLAN_LIMITS[plan];
   const atProjectLimit = !activeTeamId && projects.length >= limits.maxProjects;
@@ -63,22 +170,11 @@ export default function Dashboard() {
   const canEdit = !activeTeamId || canEditTeam(activeRole);
 
   const sortedProjects = useMemo(() => {
-    const list = [...projects];
-    if (sort === "name") {
-      list.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sort === "created") {
-      list.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
-    } else {
-      list.sort(
-        (a, b) =>
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
-      );
-    }
-    return list;
-  }, [projects, sort]);
+    return [...projects].sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+    );
+  }, [projects]);
 
   const loadTeams = useCallback(async () => {
     try {
@@ -148,10 +244,10 @@ export default function Dashboard() {
     const connected = searchParams.get("connected");
     const error = searchParams.get("error");
     if (connected === "gmail") {
-      toast.success("Gmail connected successfully");
+      toast.success("Gmail connected");
       setSearchParams({}, { replace: true });
     } else if (connected === "outlook") {
-      toast.success("Outlook connected successfully");
+      toast.success("Outlook connected");
       setSearchParams({}, { replace: true });
     } else if (error) {
       toast.error(`Connection failed: ${error}`);
@@ -242,23 +338,41 @@ export default function Dashboard() {
     navigate("/sign-in");
   };
 
-  const workspaceTitle = activeTeam ? activeTeam.name : "My projects";
-  const workspaceSubtitle = activeTeam
-    ? `Team workspace · ${projects.length} project${projects.length !== 1 ? "s" : ""}`
-    : `${projects.length} project${projects.length !== 1 ? "s" : ""}`;
+  const projectCount = projects.length;
+  const projectNoun = `project${projectCount !== 1 ? "s" : ""}`;
+  const projectsSubtext = activeTeam
+    ? `${activeTeam.name} · ${projectCount} ${projectNoun}`
+    : plan === "free"
+      ? `${projectCount} of ${limits.maxProjects} on the free plan`
+      : `${projectCount} ${projectNoun}`;
+
+  const firstName = user?.user_metadata?.first_name as string | undefined;
+  const lastName = user?.user_metadata?.last_name as string | undefined;
+  const displayName =
+    [firstName, lastName].filter(Boolean).join(" ") ||
+    user?.email ||
+    "Your account";
+
+  const showTrailingTemplateCard =
+    !loading && !search.trim() && canEdit && sortedProjects.length > 0;
 
   return (
-    <div className="min-h-screen bg-muted">
-      <header className="h-14 border-b border-white/20 flex items-center justify-between px-6">
-        <div className="flex items-center gap-2.5">
-          <img src={Logo} alt="MailShot" className="w-7 h-7" />
-          <span className="text-base font-semibold text-foreground">
+    <div className="min-h-screen flex bg-background">
+      <aside className="w-[200px] shrink-0 border-r border-sidebar-border bg-sidebar flex flex-col h-screen sticky top-0">
+        <div className="h-14 flex items-center gap-2.5 px-4 border-b border-sidebar-border shrink-0">
+          <img src={Logo} alt="" className="w-6 h-6 rounded-md shrink-0" />
+          <span className="text-sm font-medium tracking-tight text-sidebar-foreground truncate">
             MailShot
           </span>
-          <Separator
-            className="text-white bg-white/20"
-            orientation="vertical"
-          />
+        </div>
+
+        <div className="px-4 pt-3 pb-1">
+          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest truncate">
+            {activeTeam ? activeTeam.name : "Personal workspace"}
+          </p>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3 flex flex-col gap-1">
           <WorkspaceSwitcher
             memberCount={memberCount}
             onWorkspaceChange={(teamId) => {
@@ -266,179 +380,218 @@ export default function Dashboard() {
               loadProjects(search, teamId);
             }}
           />
-          <Separator
-            className="text-white bg-white/20"
-            orientation="vertical"
+
+          <div className="h-px bg-sidebar-border my-3" />
+
+          <SidebarNavItem
+            icon={FolderIcon}
+            label="Projects"
+            active={section === "projects"}
+            onClick={() => setSection("projects")}
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/profile")}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <UserIcon className="w-4 h-4 mr-2" />
-            Profile
-          </Button>
-        </div>
-        <div className="flex items-center gap-3">
+          <SidebarNavItem
+            icon={SendIcon}
+            label="Campaigns"
+            active={section === "campaigns"}
+            onClick={() => setSection("campaigns")}
+          />
+          <SidebarNavItem
+            icon={LayoutTemplateIcon}
+            label="Templates"
+            onClick={() => navigate("/templates")}
+          />
+          {activeTeam && (
+            <SidebarNavItem
+              icon={UsersIcon}
+              label="Team"
+              onClick={() => navigate(`/teams/${activeTeam.slug}/settings`)}
+            />
+          )}
+        </nav>
+
+        <div className="p-3 border-t border-sidebar-border shrink-0 flex flex-col gap-2">
           {plan === "pro" ? (
-            <span className="text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-medium tracking-wide bg-clay/10 text-clay border border-clay/25 px-2 py-0.5 rounded-full w-fit ml-1">
               PRO
             </span>
           ) : (
             <Button
               size="sm"
-              className="h-7 text-xs bg-amber-500 hover:bg-amber-600 text-black"
+              className="justify-start bg-clay hover:bg-clay/90 text-clay-foreground"
               onClick={() => setUpgradeOpen(true)}
             >
-              <ZapIcon className="w-3 h-3 mr-1" />
-              Upgrade
+              <ZapIcon className="w-3.5 h-3.5 mr-1.5" />
+              Upgrade to Pro
             </Button>
           )}
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleSignOut}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            Sign out
-            <LogOutIcon className="ml-1" />
-          </Button>
+
+          <div className="h-px bg-sidebar-border" />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2.5 w-full rounded-lg px-1.5 py-1.5 text-left transition-colors hover:bg-sidebar-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+              >
+                <Avatar className="size-8 shrink-0">
+                  <AvatarFallback className="bg-clay/15 text-clay text-[11px] font-medium">
+                    {initialsFor(displayName)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm font-medium text-sidebar-foreground truncate">
+                    {displayName}
+                  </span>
+                  <span className="block text-xs text-muted-foreground truncate">
+                    {plan === "pro" ? "Pro plan" : "Free plan"}
+                  </span>
+                </span>
+                <ChevronsUpDownIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="top" className="w-48">
+              <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <UserIcon className="w-4 h-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleSignOut}
+                className="text-destructive focus:text-destructive"
+              >
+                <LogOutIcon className="w-4 h-4 mr-2" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </header>
+      </aside>
 
-      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+      <div className="flex-1 min-w-0">
+        <UpgradeModal
+          open={upgradeOpen}
+          onClose={() => setUpgradeOpen(false)}
+        />
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
-        <h1 className="text-3xl mb-8 text-white font-semibold">
-          👋 Hello {user?.user_metadata?.first_name}{" "}
-          {user?.user_metadata?.last_name} !
-        </h1>
-
-        <Tabs defaultValue="projects">
-          <TabsList className="mb-8">
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="projects">
-            <div className="flex items-start justify-between mb-8">
-              <div>
-                <h1 className="text-2xl font-semibold text-foreground">
-                  {workspaceTitle}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {workspaceSubtitle}
-                </p>
-                {!canEdit && activeTeam && (
-                  <p className="text-xs text-amber-500/90 mt-1">
-                    View-only access — you can preview projects but not edit or
-                    save
+        <main className="max-w-6xl mx-auto px-6 py-10">
+          <Tabs value={section} onValueChange={(v) => setSection(v as DashboardSection)}>
+            <TabsContent value="projects">
+              <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h1 className="text-xl font-medium text-foreground">
+                    Projects
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {projectsSubtext}
                   </p>
-                )}
+                  {!canEdit && activeTeam && (
+                    <p className="text-xs text-clay/90 mt-1">
+                      View-only access — you can preview projects but not edit
+                      or save
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="relative">
+                    <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                    <Input
+                      placeholder="Search projects"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-56 pl-8 text-foreground"
+                    />
+                  </div>
+                  {canEdit && (
+                    <Button
+                      onClick={handleNew}
+                      className="bg-clay hover:bg-clay/90 text-clay-foreground"
+                    >
+                      <PlusIcon className="w-4 h-4 mr-2" />
+                      New project
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3 mb-6">
-                <Input
-                  placeholder="Search projects..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="max-w-full text-white"
+
+              {atProjectLimit && !activeTeamId && (
+                <UpgradePrompt
+                  feature="Unlimited projects"
+                  description={`Free plan includes ${limits.maxProjects} projects. Upgrade to Pro for unlimited.`}
+                  compact
                 />
-                <Select
-                  value={sort}
-                  onValueChange={(v) => setSort(v as typeof sort)}
-                >
-                  <SelectTrigger className="w-56 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="updated">Last updated</SelectItem>
-                    <SelectItem value="created">Date created</SelectItem>
-                    <SelectItem value="name">Name</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-row items-center gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/templates")}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Templates
-                </Button>
-                {canEdit && (
-                  <Button onClick={handleNew}>
-                    <PlusIcon className="w-4 h-4 mr-2" />
-                    New project
-                  </Button>
-                )}
-              </div>
-            </div>
+              )}
 
-            {atProjectLimit && !activeTeamId && (
-              <UpgradePrompt
-                feature="Unlimited projects"
-                description={`Free plan includes ${limits.maxProjects} projects. Upgrade to Pro for unlimited.`}
-              />
-            )}
-
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-48 rounded-xl border border-border bg-card animate-pulse"
-                  />
-                ))}
-              </div>
-            ) : sortedProjects.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
-                  <img
-                    src={Logo}
-                    alt="MailShot"
-                    className="w-7 h-7 opacity-40"
-                  />
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                  {[...Array(6)].map((_, i) => (
+                    <ProjectCardSkeleton key={i} />
+                  ))}
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-foreground">
-                    No projects yet
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {canEdit
-                      ? "Create your first newsletter to get started"
-                      : "No team projects to show"}
-                  </p>
-                </div>
-                {canEdit && (
-                  <Button onClick={handleNew}>
-                    <PlusIcon className="w-4 h-4 mr-2" />
-                    New project
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {sortedProjects.map((project) => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onClick={() => handleOpen(project)}
-                    onDelete={
-                      canEdit ? () => handleDelete(project.id) : undefined
-                    }
-                    canRename={canEdit}
+              ) : sortedProjects.length === 0 ? (
+                search.trim() ? (
+                  <EmptyState
+                    headline="No projects match this search"
+                    body={`Nothing matches "${search.trim()}". Try a different name.`}
+                    canEdit={canEdit}
+                    onNew={handleNew}
                   />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+                ) : (
+                  <EmptyState
+                    headline="Start your first project"
+                    body="Build a newsletter from a blank canvas or a template."
+                    canEdit={canEdit}
+                    onNew={handleNew}
+                  />
+                )
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                  {sortedProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onClick={() => handleOpen(project)}
+                      onDelete={
+                        canEdit ? () => handleDelete(project.id) : undefined
+                      }
+                      onDuplicated={(copy) =>
+                        setProjects((prev) => [copy, ...prev])
+                      }
+                      canRename={canEdit}
+                    />
+                  ))}
+                  {showTrailingTemplateCard &&
+                    (atProjectLimit ? (
+                      <div className="rounded-xl border border-border bg-card flex flex-col items-center justify-center gap-3 min-h-[200px] p-6 text-center">
+                        <ZapIcon className="w-5 h-5 text-clay" strokeWidth={1.75} />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            You've reached the free plan limit
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Upgrade to Pro for unlimited projects.
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="bg-clay hover:bg-clay/90 text-clay-foreground"
+                          onClick={() => setUpgradeOpen(true)}
+                        >
+                          Upgrade to Pro
+                        </Button>
+                      </div>
+                    ) : (
+                      <NewProjectCard onClick={() => navigate("/templates")} />
+                    ))}
+                </div>
+              )}
+            </TabsContent>
 
-          <TabsContent value="campaigns">
-            <CampaignsTab />
-          </TabsContent>
-        </Tabs>
-      </main>
+            <TabsContent value="campaigns">
+              <CampaignsTab />
+            </TabsContent>
+          </Tabs>
+        </main>
+      </div>
     </div>
   );
 }

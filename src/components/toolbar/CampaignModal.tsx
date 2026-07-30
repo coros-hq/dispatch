@@ -368,7 +368,10 @@ export default function CampaignModal() {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
-          <Button size="sm">
+          <Button
+            size="sm"
+            className="bg-clay text-clay-foreground hover:bg-clay/90"
+          >
             <RocketIcon className="size-3.5 mr-1.5" />
             Send campaign
           </Button>
@@ -385,7 +388,10 @@ export default function CampaignModal() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="sm">
+        <Button
+          size="sm"
+          className="bg-clay text-clay-foreground hover:bg-clay/90"
+        >
           <RocketIcon className="size-3.5 mr-1.5" />
           Send campaign
         </Button>

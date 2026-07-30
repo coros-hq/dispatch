@@ -8,6 +8,7 @@ import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SendIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -102,7 +103,12 @@ export default function SendTestModal() {
       />
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <SendIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
             Send test
           </Button>
         </DialogTrigger>

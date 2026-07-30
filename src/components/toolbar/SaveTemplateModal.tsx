@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { SaveIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -113,7 +114,12 @@ export default function SaveTemplateModal() {
       />
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 border-border text-foreground bg-transparent hover:bg-secondary"
+        >
+          <SaveIcon className="w-3.5 h-3.5" strokeWidth={1.75} />
           {isExisting ? "Save" : "Save template"}
         </Button>
       </DialogTrigger>

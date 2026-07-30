@@ -70,10 +70,10 @@ function SortableCanvasTab({
       {...listeners}
       onClick={onSelect}
       onDoubleClick={onDoubleClickRename}
-      className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs cursor-pointer shrink-0 group transition-colors ${
+      className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs cursor-pointer shrink-0 group transition-colors border ${
         isActive
-          ? "bg-accent text-foreground font-medium"
-          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+          ? "bg-clay/10 border-clay/30 text-foreground font-medium"
+          : "border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground"
       }`}
     >
       {renamingId === canvas.id ? (
@@ -88,7 +88,7 @@ function SortableCanvasTab({
           }}
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => e.stopPropagation()}
-          className="bg-transparent outline-none border-b border-primary w-20 text-xs"
+          className="bg-transparent outline-none border-b border-clay w-20 text-xs"
         />
       ) : (
         <span>{canvas.name}</span>

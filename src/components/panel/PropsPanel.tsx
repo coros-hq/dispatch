@@ -47,14 +47,11 @@ export default function PropsPanel() {
         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
           Global styles
         </p>
-        <Field label="Canvas background">
-          <input
-            type="color"
-            className="w-full h-8 rounded cursor-pointer border border-border"
-            value={activeCanvas.globalStyles.bgColor}
-            onChange={(e) => updateGlobalStyles({ bgColor: e.target.value })}
-          />
-        </Field>
+        <ColorField
+          label="Canvas background"
+          value={activeCanvas.globalStyles.bgColor}
+          onChange={(e) => updateGlobalStyles({ bgColor: e.target.value })}
+        />
         <Field label="Content width">
           <Input
             type="number"
@@ -132,16 +129,13 @@ export default function PropsPanel() {
         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
           Section
         </p>
-        <Field label="Background">
-          <input
-            type="color"
-            className="w-full h-8 rounded cursor-pointer border border-border"
-            value={section.bgColor}
-            onChange={(e) =>
-              updateSection(section.id, { bgColor: e.target.value })
-            }
-          />
-        </Field>
+        <ColorField
+          label="Background"
+          value={section.bgColor}
+          onChange={(e) =>
+            updateSection(section.id, { bgColor: e.target.value })
+          }
+        />
         <Field label="Column gap">
           <Input
             type="number"
@@ -162,16 +156,13 @@ export default function PropsPanel() {
             }
           />
         </Field>
-        <Field label="Border color">
-          <input
-            type="color"
-            className="w-full h-8 rounded cursor-pointer border border-border"
-            value={section.borderColor ?? "#000000"}
-            onChange={(e) =>
-              updateSection(section.id, { borderColor: e.target.value })
-            }
-          />
-        </Field>
+        <ColorField
+          label="Border color"
+          value={section.borderColor ?? "#000000"}
+          onChange={(e) =>
+            updateSection(section.id, { borderColor: e.target.value })
+          }
+        />
         <Field label="Border width">
           <Input
             type="number"
@@ -365,7 +356,7 @@ export default function PropsPanel() {
 
     return (
       <div className="p-4 flex flex-col gap-4">
-        <p className="text-[10px] font-medium text-white/30 uppercase tracking-widest">
+        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
           {typeLabel}
         </p>
 
@@ -386,22 +377,16 @@ export default function PropsPanel() {
                 onChange={(e) => update({ fontSize: Number(e.target.value) })}
               />
             </Field>
-            <Field label="Color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.color}
-                onChange={(e) => update({ color: e.target.value })}
-              />
-            </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor ?? "#ffffff"}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Color"
+              value={block.color}
+              onChange={(e) => update({ color: e.target.value })}
+            />
+            <ColorField
+              label="Background"
+              value={block.bgColor ?? "#ffffff"}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
             <Field label="Align">
               <Select
                 value={block.align}
@@ -588,14 +573,11 @@ export default function PropsPanel() {
                 }
               />
             </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor ?? "#ffffff"}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.bgColor ?? "#ffffff"}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
               Padding
             </p>
@@ -655,22 +637,16 @@ export default function PropsPanel() {
                 onChange={(e) => update({ href: e.target.value })}
               />
             </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Text color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.textColor}
-                onChange={(e) => update({ textColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.bgColor}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
+            <ColorField
+              label="Text color"
+              value={block.textColor}
+              onChange={(e) => update({ textColor: e.target.value })}
+            />
             <Field label="Border radius">
               <Input
                 type="number"
@@ -680,14 +656,11 @@ export default function PropsPanel() {
                 }
               />
             </Field>
-            <Field label="Border color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.borderColor ?? block.bgColor}
-                onChange={(e) => update({ borderColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Border color"
+              value={block.borderColor ?? block.bgColor}
+              onChange={(e) => update({ borderColor: e.target.value })}
+            />
             <Field label="Border width">
               <Input
                 type="number"
@@ -758,14 +731,11 @@ export default function PropsPanel() {
 
         {block.type === "divider" && (
           <>
-            <Field label="Color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer"
-                value={block.color}
-                onChange={(e) => update({ color: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Color"
+              value={block.color}
+              onChange={(e) => update({ color: e.target.value })}
+            />
             <Field label="Thickness">
               <Input
                 type="number"
@@ -812,14 +782,11 @@ export default function PropsPanel() {
                 onChange={(e) => update({ iconSize: Number(e.target.value) })}
               />
             </Field>
-            <Field label="Icon color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.iconColor}
-                onChange={(e) => update({ iconColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Icon color"
+              value={block.iconColor}
+              onChange={(e) => update({ iconColor: e.target.value })}
+            />
             <Field label="Links">
               <div className="flex flex-col gap-2">
                 {block.links.map((link, i) => (
@@ -962,14 +929,11 @@ export default function PropsPanel() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.titleColor ?? "#111111"}
-                onChange={(e) => update({ titleColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Color"
+              value={block.titleColor ?? "#111111"}
+              onChange={(e) => update({ titleColor: e.target.value })}
+            />
 
             {/* ── DESCRIPTION ── */}
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
@@ -993,14 +957,11 @@ export default function PropsPanel() {
                 }
               />
             </Field>
-            <Field label="Color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.descriptionColor ?? "#555555"}
-                onChange={(e) => update({ descriptionColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Color"
+              value={block.descriptionColor ?? "#555555"}
+              onChange={(e) => update({ descriptionColor: e.target.value })}
+            />
 
             {/* ── PRICE ── */}
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
@@ -1039,14 +1000,11 @@ export default function PropsPanel() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.priceColor ?? "#111111"}
-                onChange={(e) => update({ priceColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Color"
+              value={block.priceColor ?? "#111111"}
+              onChange={(e) => update({ priceColor: e.target.value })}
+            />
 
             {/* ── BUTTON ── */}
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
@@ -1065,22 +1023,16 @@ export default function PropsPanel() {
                 onChange={(e) => update({ buttonHref: e.target.value })}
               />
             </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.buttonBgColor}
-                onChange={(e) => update({ buttonBgColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Text color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.buttonTextColor}
-                onChange={(e) => update({ buttonTextColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.buttonBgColor}
+              onChange={(e) => update({ buttonBgColor: e.target.value })}
+            />
+            <ColorField
+              label="Text color"
+              value={block.buttonTextColor}
+              onChange={(e) => update({ buttonTextColor: e.target.value })}
+            />
             <Field label="Font size">
               <Input
                 type="number"
@@ -1132,14 +1084,11 @@ export default function PropsPanel() {
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest pt-2">
               Card
             </p>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.cardBgColor ?? "#ffffff"}
-                onChange={(e) => update({ cardBgColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.cardBgColor ?? "#ffffff"}
+              onChange={(e) => update({ cardBgColor: e.target.value })}
+            />
             <Field label="Padding">
               <Input
                 type="number"
@@ -1166,14 +1115,11 @@ export default function PropsPanel() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Border color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.cardBorderColor ?? "#e5e7eb"}
-                onChange={(e) => update({ cardBorderColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Border color"
+              value={block.cardBorderColor ?? "#e5e7eb"}
+              onChange={(e) => update({ cardBorderColor: e.target.value })}
+            />
             <Field label="Border width">
               <Input
                 type="number"
@@ -1219,14 +1165,11 @@ export default function PropsPanel() {
                 onChange={(e) => update({ unsubscribeUrl: e.target.value })}
               />
             </Field>
-            <Field label="Text color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.textColor}
-                onChange={(e) => update({ textColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Text color"
+              value={block.textColor}
+              onChange={(e) => update({ textColor: e.target.value })}
+            />
             <Field label="Font size">
               <Input
                 type="number"
@@ -1245,14 +1188,11 @@ export default function PropsPanel() {
                 onChange={(e) => update({ text: e.target.value })}
               />
             </Field>
-            <Field label="Color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.color}
-                onChange={(e) => update({ color: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Color"
+              value={block.color}
+              onChange={(e) => update({ color: e.target.value })}
+            />
             <Field label="Font size">
               <Input
                 type="number"
@@ -1329,30 +1269,21 @@ export default function PropsPanel() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor ?? "#f4f7fb"}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Number tiles">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.accentColor ?? "#2563eb"}
-                onChange={(e) => update({ accentColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Text color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.textColor ?? "#0f172a"}
-                onChange={(e) => update({ textColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.bgColor ?? "#f4f7fb"}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
+            <ColorField
+              label="Number tiles"
+              value={block.accentColor ?? "#2563eb"}
+              onChange={(e) => update({ accentColor: e.target.value })}
+            />
+            <ColorField
+              label="Text color"
+              value={block.textColor ?? "#0f172a"}
+              onChange={(e) => update({ textColor: e.target.value })}
+            />
           </>
         )}
 
@@ -1402,38 +1333,26 @@ export default function PropsPanel() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor ?? "#ffffff"}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Quote text color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.textColor ?? "#334155"}
-                onChange={(e) => update({ textColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Author color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.authorColor ?? "#0f172a"}
-                onChange={(e) => update({ authorColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Accent border">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.accentColor ?? "#6366f1"}
-                onChange={(e) => update({ accentColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.bgColor ?? "#ffffff"}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
+            <ColorField
+              label="Quote text color"
+              value={block.textColor ?? "#334155"}
+              onChange={(e) => update({ textColor: e.target.value })}
+            />
+            <ColorField
+              label="Author color"
+              value={block.authorColor ?? "#0f172a"}
+              onChange={(e) => update({ authorColor: e.target.value })}
+            />
+            <ColorField
+              label="Accent border"
+              value={block.accentColor ?? "#6366f1"}
+              onChange={(e) => update({ accentColor: e.target.value })}
+            />
           </>
         )}
 
@@ -1479,30 +1398,21 @@ export default function PropsPanel() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Inner background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor ?? "#fdfdfd"}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Dash / border">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.borderColor ?? "#1e293b"}
-                onChange={(e) => update({ borderColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Code color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.textColor ?? "#0f172a"}
-                onChange={(e) => update({ textColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Inner background"
+              value={block.bgColor ?? "#fdfdfd"}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
+            <ColorField
+              label="Dash / border"
+              value={block.borderColor ?? "#1e293b"}
+              onChange={(e) => update({ borderColor: e.target.value })}
+            />
+            <ColorField
+              label="Code color"
+              value={block.textColor ?? "#0f172a"}
+              onChange={(e) => update({ textColor: e.target.value })}
+            />
           </>
         )}
 
@@ -1560,22 +1470,16 @@ export default function PropsPanel() {
                 onChange={(e) => update({ starSize: Number(e.target.value) })}
               />
             </Field>
-            <Field label="Filled star color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.starColor ?? "#f59e0b"}
-                onChange={(e) => update({ starColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Empty star color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.emptyStarColor ?? "#e2e8f0"}
-                onChange={(e) => update({ emptyStarColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Filled star color"
+              value={block.starColor ?? "#f59e0b"}
+              onChange={(e) => update({ starColor: e.target.value })}
+            />
+            <ColorField
+              label="Empty star color"
+              value={block.emptyStarColor ?? "#e2e8f0"}
+              onChange={(e) => update({ emptyStarColor: e.target.value })}
+            />
           </>
         )}
 
@@ -1709,14 +1613,11 @@ export default function PropsPanel() {
                 onChange={(e) => update({ gap: Number(e.target.value) })}
               />
             </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.bgColor}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
             <Field label="Logos">
               <div className="flex flex-col gap-2">
                 {block.logos.map((logo, i) => (
@@ -1822,22 +1723,16 @@ export default function PropsPanel() {
                 onChange={(e) => update({ buttonHref: e.target.value })}
               />
             </Field>
-            <Field label="Button background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.buttonBgColor}
-                onChange={(e) => update({ buttonBgColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Button text color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.buttonTextColor}
-                onChange={(e) => update({ buttonTextColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Button background"
+              value={block.buttonBgColor ?? "#ffffff"}
+              onChange={(e) => update({ buttonBgColor: e.target.value })}
+            />
+            <ColorField
+              label="Button text color"
+              value={block.buttonTextColor ?? "#0f172a"}
+              onChange={(e) => update({ buttonTextColor: e.target.value })}
+            />
             <Field label="Overlay (CSS rgba)">
               <Input
                 value={block.overlayColor}
@@ -1903,22 +1798,16 @@ export default function PropsPanel() {
                 onChange={(e) => update({ logoWidth: Number(e.target.value) })}
               />
             </Field>
-            <Field label="Background">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.bgColor ?? "#ffffff"}
-                onChange={(e) => update({ bgColor: e.target.value })}
-              />
-            </Field>
-            <Field label="Link color">
-              <input
-                type="color"
-                className="w-full h-8 rounded cursor-pointer border border-border"
-                value={block.linkColor ?? "#0f172a"}
-                onChange={(e) => update({ linkColor: e.target.value })}
-              />
-            </Field>
+            <ColorField
+              label="Background"
+              value={block.bgColor ?? "#ffffff"}
+              onChange={(e) => update({ bgColor: e.target.value })}
+            />
+            <ColorField
+              label="Link color"
+              value={block.linkColor ?? "#0f172a"}
+              onChange={(e) => update({ linkColor: e.target.value })}
+            />
             <Field label="Links">
               <div className="flex flex-col gap-2">
                 {block.links.map((link, i) => (
@@ -1986,8 +1875,38 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="text-[11px] text-white/40">{label}</Label>
+      <Label className="text-[11px] text-muted-foreground">{label}</Label>
       {children}
     </div>
+  );
+}
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <Field label={label}>
+      <label className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-lg border border-input bg-input/30 px-2.5 transition-colors hover:bg-input/50 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50">
+        <span
+          className="size-4 shrink-0 rounded-full ring-1 ring-inset ring-white/10"
+          style={{ backgroundColor: value }}
+        />
+        <input
+          type="color"
+          value={value}
+          onChange={onChange}
+          className="sr-only"
+        />
+        <span className="flex-1 truncate font-mono text-xs uppercase text-foreground">
+          {value}
+        </span>
+      </label>
+    </Field>
   );
 }
